@@ -11,43 +11,37 @@
     <link rel="stylesheet" href="index.css">
     <style>
         :root {
-            --primary: #2563eb;
-            --secondary: #06b6d4;
-            --accent: #d946ef;
+            --primary: #06b6d4;
+            --secondary: #2dd4bf;
+            --accent: #f472b6;
+            --bg-cyan: #ecfeff;
+            --bg-blush: #fdf2f8;
+            --text-main: #1e293b;
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --card-bg: rgba(255, 255, 255, 0.8);
+        }
+
+        [data-theme="dark"] {
+            --bg-cyan: #0f172a;
+            /* Slate 900 */
+            --bg-blush: #1e1b4b;
+            /* Deep Indigo */
+            --text-main: #f1f5f9;
+            /* Slate 100 */
+            --glass-bg: rgba(30, 41, 59, 0.4);
+            --card-bg: rgba(15, 23, 42, 0.5);
+            --secondary: #22d3ee;
+            --primary: #06b6d4;
+            --accent: #f472b6;
         }
 
         body {
-            background: #ffffff;
-            color: #0f172a;
+            background: linear-gradient(135deg, var(--bg-cyan) 0%, var(--bg-blush) 100%);
+            color: var(--text-main);
             font-family: 'Plus Jakarta Sans', sans-serif;
             overflow-x: hidden;
             min-height: 100vh;
-            transition: all 1s ease;
-        }
-
-        body.celebration-theme {
-            background: #0f172a;
-            color: #f8fafc;
-        }
-
-        body.celebration-theme .mesh-gradient {
-            background: 
-                radial-gradient(circle at 10% 10%, #1e293b 0%, transparent 40%),
-                radial-gradient(circle at 90% 10%, #1e1b4b 0%, transparent 40%),
-                radial-gradient(circle at 50% 50%, #0f172a 0%, transparent 100%),
-                linear-gradient(135deg, #020617 0%, #0f172a 100%);
-        }
-
-        body.celebration-theme .glass {
-            background: rgba(30, 41, 59, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #f8fafc;
-        }
-
-        body.celebration-theme h1, 
-        body.celebration-theme h2,
-        body.celebration-theme .text-slate-900 {
-            color: #f8fafc !important;
+            transition: background 0.5s ease, color 0.5s ease;
         }
 
         .mesh-gradient {
@@ -56,109 +50,22 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background:
-                radial-gradient(circle at 10% 10%, #f0f9ff 0%, transparent 40%),
-                radial-gradient(circle at 90% 10%, #f5f3ff 0%, transparent 40%),
-                radial-gradient(circle at 50% 50%, #ffffff 0%, transparent 100%),
-                linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            background: linear-gradient(135deg, var(--bg-cyan) 0%, var(--bg-blush) 100%);
             z-index: -2;
-            transition: background 1s ease;
         }
 
-        /* LED Lights */
-        .led-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            display: flex;
-            justify-content: space-around;
-            padding: 0 20px;
-            pointer-events: none;
-            z-index: 100;
-            display: none;
-        }
-
-        body.celebration-theme .led-container {
-            display: flex;
-        }
-
-        .led-light {
-            width: 12px;
-            height: 25px;
-            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-            position: relative;
-            animation: flash 1.5s infinite;
-        }
-
-        .led-light::before {
+        [data-theme="dark"] .mesh-gradient::after {
             content: '';
             position: absolute;
-            top: -5px;
-            left: 2px;
-            width: 8px;
-            height: 6px;
-            background: #444;
-            border-radius: 2px;
-        }
-
-        @keyframes flash {
-            0%, 100% { opacity: 0.3; filter: brightness(0.5); }
-            50% { opacity: 1; filter: brightness(1.5) blur(1px); }
-        }
-
-        /* Snow & Gifts */
-        .snow-pile {
-            position: fixed;
-            bottom: -10px;
-            left: 0;
-            width: 100%;
-            height: 60px;
-            background: linear-gradient(to bottom, #fff 0%, #e2e8f0 100%);
-            border-radius: 100% 100% 0 0 / 100% 100% 0 0;
-            z-index: 5;
-            box-shadow: 0 -5px 15px rgba(255,255,255,0.5);
-            display: none;
-        }
-
-        body.celebration-theme .snow-pile {
-            display: block;
-        }
-
-        .gifts-container {
-            position: fixed;
-            bottom: 20px;
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            padding: 0 50px;
+            inset: 0;
+            background:
+                radial-gradient(circle at 20% 30%, rgba(6, 182, 212, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(244, 114, 182, 0.1) 0%, transparent 50%);
             pointer-events: none;
-            z-index: 6;
-            display: none;
-        }
-
-        body.celebration-theme .gifts-container {
-            display: flex;
-        }
-
-        .glowing-2026 {
-            font-size: 4rem;
-            font-weight: 900;
-            background: linear-gradient(to right, #60a5fa, #c084fc);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 15px rgba(96, 165, 250, 0.8));
-            animation: glow 2s infinite alternate;
-            display: none;
-        }
-
-        @keyframes glow {
-            from { filter: drop-shadow(0 0 10px rgba(96, 165, 250, 0.5)); }
-            to { filter: drop-shadow(0 0 30px rgba(192, 132, 252, 1)); transform: scale(1.05); }
         }
 
         .glass {
-            background: rgba(255, 255, 255, 0.7);
+            background: var(--glass-bg);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(15, 23, 42, 0.1);
@@ -168,12 +75,24 @@
 
         .game-icon {
             cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
         }
 
         .game-icon:hover {
-            transform: scale(1.1) rotate(3deg);
-            border-color: var(--primary);
+            transform: scale(1.05) translateY(-5px);
+            border-color: var(--primary) !important;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        [data-theme="dark"] .game-icon {
+            background: rgba(30, 41, 59, 0.4);
+            border-color: rgba(255, 255, 255, 0.05) !important;
+        }
+
+        [data-theme="dark"] .game-icon:hover {
+            box-shadow: 0 0 30px rgba(6, 182, 212, 0.2);
+            background: rgba(30, 41, 59, 0.6);
         }
 
         @keyframes bounce-slow {
@@ -251,135 +170,315 @@
                 gap: 1rem;
             }
         }
+
+        /* Landing Screen Styles */
+        #landing-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at 50% 50%, var(--bg-cyan) 0%, var(--bg-blush) 100%);
+            transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1), transform 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Celebration Overlay */
+        #celebration-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #0891b2;
+            /* Greenish Blue */
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        #celebration-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .year-transition {
+            display: flex;
+            align-items: center;
+            font-size: 8rem;
+            font-weight: 900;
+            color: white;
+            perspective: 1000px;
+        }
+
+        .digit-container {
+            position: relative;
+            height: 1.2em;
+            overflow: hidden;
+            display: inline-block;
+            width: 0.7em;
+            text-align: center;
+        }
+
+        .digit-5,
+        .digit-6 {
+            position: absolute;
+            left: 0;
+            right: 0;
+            display: block;
+            transition: transform 0.8s cubic-bezier(0.68, -0.6, 0.32, 1.6);
+        }
+
+        .digit-5 {
+            transform: translateY(0);
+        }
+
+        .digit-6 {
+            transform: translateY(-100%);
+        }
+
+        .active-transition .digit-5 {
+            transform: translateY(100%);
+        }
+
+        .active-transition .digit-6 {
+            transform: translateY(0);
+        }
+
+        .slide-in {
+            animation: yearSlideIn 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            opacity: 0;
+            transform: translateX(-100px);
+        }
+
+        @keyframes yearSlideIn {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        #landing-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(1.1);
+        }
+
+        .cooking-text {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--primary);
+            margin-bottom: 2rem;
+            text-shadow: 0 0 20px rgba(6, 182, 212, 0.2);
+            animation: pulse-glow 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse-glow {
+
+            0%,
+            100% {
+                opacity: 0.6;
+                transform: translateY(0);
+            }
+
+            50% {
+                opacity: 1;
+                transform: translateY(-5px);
+            }
+        }
+
+        .landing-timer-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 32px;
+            padding: 2rem;
+            min-width: 140px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease, background 0.5s ease;
+        }
+
+        .landing-timer-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stay-tunned {
+            margin-top: 3rem;
+            font-weight: 700;
+            color: #64748b;
+            letter-spacing: 0.1em;
+            animation: slide-in 1s ease-out;
+        }
+
+        @keyframes slide-in {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 
 <body class="p-4 md:p-8">
-    <div class="led-container" id="leds"></div>
-    <div class="mesh-gradient"></div>
-    <canvas id="canvas"></canvas>
-
-    <main class="max-w-6xl mx-auto space-y-12 relative z-10">
-        <!-- Header -->
-        <div id="countdown-header" class="text-center space-y-4">
+    <div id="landing-screen">
+        <div class="cooking-text">Something is Cooking!!!</div>
+        <div class="flex gap-4 md:gap-8 flex-wrap justify-center p-4">
+            <div class="landing-timer-card">
+                <span id="landing-days" class="text-5xl md:text-7xl font-black leading-none">00</span>
+                <span class="text-xs font-bold opacity-40 uppercase tracking-widest mt-2">Days</span>
+            </div>
+            <div class="landing-timer-card">
+                <span id="landing-hours" class="text-5xl md:text-7xl font-black leading-none">00</span>
+                <span class="text-xs font-bold opacity-40 uppercase tracking-widest mt-2">Hours</span>
+            </div>
+            <div class="landing-timer-card">
+                <span id="landing-minutes" class="text-5xl md:text-7xl font-black leading-none">00</span>
+                <span class="text-xs font-bold opacity-40 uppercase tracking-widest mt-2">Mins</span>
+            </div>
             <div
-                class="inline-flex items-center gap-2 px-4 py-1.5 glass rounded-full text-[10px] font-bold tracking-widest uppercase text-blue-600">
-                <span>🚀</span> 2026 Adventure
-            </div>
-            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight text-slate-900 leading-tight">
-                New Year <span
-                    class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500">Magic</span>
-            </h1>
-
-            <div id="timer-container" class="flex justify-center gap-4 md:gap-8 mt-8">
-                <div class="text-center">
-                    <div id="days" class="text-4xl md:text-6xl font-black text-slate-900">00</div>
-                    <div class="text-[10px] uppercase font-bold text-slate-400">Days</div>
-                </div>
-                <div class="text-center">
-                    <div id="hours" class="text-4xl md:text-6xl font-black text-slate-900">00</div>
-                    <div class="text-[10px] uppercase font-bold text-slate-400">Hours</div>
-                </div>
-                <div class="text-center">
-                    <div id="minutes" class="text-4xl md:text-6xl font-black text-slate-900">00</div>
-                    <div class="text-[10px] uppercase font-bold text-slate-400">Mins</div>
-                </div>
-                <div class="text-center">
-                    <div id="seconds" class="text-4xl md:text-6xl font-black text-blue-600">00</div>
-                    <div class="text-[10px] uppercase font-bold text-slate-400">Secs</div>
-                </div>
+                class="landing-timer-card border-b-8 border-[var(--primary)] shadow-[0_15px_40px_rgba(14,165,233,0.2)]">
+                <span id="landing-seconds"
+                    class="text-5xl md:text-7xl font-black text-[var(--primary)] leading-none">00</span>
+                <span
+                    class="text-xs font-bold text-[var(--primary)] opacity-60 uppercase tracking-widest mt-2">Secs</span>
             </div>
         </div>
+        <div class="stay-tunned uppercase tracking-widest text-sm font-black opacity-30">Stay Tunned!!!</div>
+    </div>
 
-        <!-- Celebration Title (Hidden by default) -->
-        <div id="celebration-header" class="hidden text-center space-y-4 py-10">
-            <h1 class="text-6xl md:text-8xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-blue-400 via-white to-cyan-400 animate-pulse">
-                HAPPY 2026!
-            </h1>
-            <p class="text-xl font-bold text-blue-300 tracking-widest uppercase">The Year of New Adventures Begins</p>
-        </div>
+    <!-- Global Toggles -->
+    <div class="fixed top-8 right-8 z-[1100] flex flex-col gap-4">
+        <button onclick="toggleTheme()"
+            class="w-14 h-14 glass flex items-center justify-center rounded-full hover:scale-110 active:scale-95 transition-all text-2xl shadow-xl">
+            <span id="theme-icon">🌙</span>
+        </button>
+        <button onclick="sounds.toggleMute()"
+            class="w-14 h-14 glass flex items-center justify-center rounded-full hover:scale-110 active:scale-95 transition-all text-2xl shadow-xl">
+            <span id="mute-icon">🔊</span>
+        </button>
+    </div>
 
-        <!-- Games Arcade -->
-        <div class="glass p-8 space-y-8">
-            <div class="flex items-center justify-between">
-                <h2 class="text-2xl font-black text-slate-900 flex items-center gap-3">
-                    <span class="p-2 bg-blue-100 rounded-xl text-blue-600">🎮</span>
-                    Game Station
-                </h2>
-                <div class="text-sm font-bold text-blue-600 bg-blue-50 px-6 py-2 rounded-full shadow-sm">
-                    Total Energy: <span id="score">0</span>
-                </div>
+    <!-- Celebration Overlay -->
+    <div id="celebration-overlay">
+        <div class="year-transition slide-in">
+            <span>202</span>
+            <div class="digit-container">
+                <span class="digit-5">5</span>
+                <span class="digit-6">6</span>
             </div>
-
-            <div id="games-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-                <!-- Icons injected here -->
-            </div>
-        </div>
-
-        <!-- Footer Actions -->
-        <div class="flex flex-wrap items-center justify-center gap-4">
-            <button onclick="igniteSpread()"
-                class="px-10 py-5 bg-slate-900 text-white font-black rounded-2xl hover:scale-105 transition-all active:scale-95 flex items-center gap-3 group shadow-xl">
-                <span class="group-hover:rotate-45 transition-transform text-2xl">🎆</span> FIREWORKS
-            </button>
-            <button onclick="showJoke()"
-                class="px-10 py-5 glass text-slate-900 font-black rounded-2xl hover:bg-white/50 transition-all active:scale-95 flex items-center gap-3 shadow-md">
-                <span class="text-2xl">🤣</span> JOKES
-            </button>
-        </div>
-    </main>
-
-    <!-- Unified Game Modal -->
-    <div id="game-modal"
-        class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md hidden">
-        <div
-            class="glass w-full max-w-4xl p-6 md:p-10 relative modal-enter max-h-[96vh] flex flex-col overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.3)] border-white/20">
-            <button onclick="closeModal()"
-                class="absolute top-4 right-4 z-[110] w-12 h-12 flex items-center justify-center bg-white/10 hover:bg-red-500/20 hover:text-red-500 backdrop-blur-md rounded-full transition-all font-black text-2xl border border-white/20 shadow-xl group">
-                <span class="group-hover:rotate-90 transition-transform">✕</span>
-            </button>
-            <div id="modal-content"
-                class="flex-1 overflow-y-auto scrollbar-hide flex flex-col items-center justify-center"></div>
         </div>
     </div>
 
-    <!-- Companion -->
-    <div class="fixed bottom-8 right-8 animate-float cursor-pointer" onclick="igniteSpread()">
-        <div class="glass p-4 flex items-center gap-3">
+    <div id="main-content" class="opacity-0 transition-opacity duration-1000 hidden">
+        <div class="mesh-gradient"></div>
+        <canvas id="canvas"></canvas>
+
+        <main class="max-w-6xl mx-auto space-y-12 relative z-10">
+            <!-- Header -->
+            <div class="text-center space-y-4">
+                <div
+                    class="inline-flex items-center gap-2 px-4 py-1.5 glass rounded-full text-[10px] font-bold tracking-widest uppercase text-[var(--primary)]">
+                    <span>🚀</span> 2026 Adventure
+                </div>
+                <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight leading-tight">
+                    New Year <span
+                        class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-pink-500">Magic</span>
+                </h1>
+
+                <div id="main-timer" class="flex justify-center gap-4 md:gap-8 mt-8 hidden">
+                    <div class="text-center">
+                    </div>
+                    <div class="text-center">
+                        <div id="hours" class="text-4xl md:text-6xl font-black">00</div>
+                        <div class="text-[10px] uppercase font-bold opacity-50">Hours</div>
+                    </div>
+                    <div class="text-center">
+                        <div id="minutes" class="text-4xl md:text-6xl font-black">00</div>
+                        <div class="text-[10px] uppercase font-bold opacity-50">Mins</div>
+                    </div>
+                    <div class="text-center">
+                        <div id="seconds" class="text-4xl md:text-6xl font-black text-[var(--primary)]">00</div>
+                        <div class="text-[10px] uppercase font-bold opacity-50">Secs</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Games Arcade -->
+            <div class="glass p-8 space-y-8">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-2xl font-black flex items-center gap-3">
+                        <span class="p-2 bg-[var(--primary)]/10 rounded-xl text-[var(--primary)]">🎮</span>
+                        Game Station
+                    </h2>
+                    <div
+                        class="text-sm font-bold text-[var(--primary)] bg-[var(--primary)]/10 px-6 py-2 rounded-full shadow-sm border border-[var(--primary)]/20">
+                        Total Energy: <span id="score">0</span>
+                    </div>
+                </div>
+
+                <div id="games-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                    <!-- Icons injected here -->
+                </div>
+            </div>
+
+            <!-- Footer Actions -->
+            <div class="flex flex-wrap items-center justify-center gap-4">
+                <button onclick="igniteSpread()"
+                    class="px-10 py-5 bg-[var(--primary)] text-white font-black rounded-2xl hover:scale-105 transition-all active:scale-95 flex items-center gap-3 group shadow-xl">
+                    <span class="group-hover:rotate-45 transition-transform text-2xl">🎆</span> FIREWORKS
+                </button>
+                <button onclick="showJoke()"
+                    class="px-10 py-5 glass font-black rounded-2xl hover:bg-white/10 transition-all active:scale-95 flex items-center gap-3 shadow-md">
+                    <span class="text-2xl">🤣</span> JOKES
+                </button>
+            </div>
+        </main>
+
+        <!-- Unified Game Modal -->
+        <div id="game-modal"
+            class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md hidden">
             <div
-                class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-3xl shadow-xl">
-                🐧</div>
-            <div class="text-left hidden lg:block">
-                <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">By</div>
-                <div class="text-base font-black text-slate-900">Muhammad Haseeb</div>
+                class="glass w-full max-w-4xl p-6 md:p-10 relative modal-enter max-h-[96vh] flex flex-col overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.3)] border-white/20">
+                <button onclick="closeModal()"
+                    class="absolute top-4 right-4 z-[110] w-12 h-12 flex items-center justify-center bg-white/10 hover:bg-red-500/20 hover:text-red-500 backdrop-blur-md rounded-full transition-all font-black text-2xl border border-white/20 shadow-xl group">
+                    <span class="group-hover:rotate-90 transition-transform">✕</span>
+                </button>
+                <div id="modal-content"
+                    class="flex-1 overflow-y-auto scrollbar-hide flex flex-col items-center justify-center"></div>
             </div>
         </div>
-    </div>
 
-    <div id="toast-container" class="fixed top-8 right-8 z-[200] space-y-4 pointer-events-none"></div>
+        <!-- Companion -->
+        <div class="fixed bottom-8 right-8 animate-float cursor-pointer" onclick="igniteSpread()">
+            <div class="glass p-4 flex items-center gap-3">
+                <div
+                    class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-3xl shadow-xl">
+                    🐧</div>
+                <div class="text-left hidden lg:block">
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">By</div>
+                    <div class="text-base font-black">Muhammad Haseeb</div>
+                </div>
+            </div>
+        </div>
 
-    <div class="snow-pile"></div>
-    <div class="gifts-container" id="gifts">
-        <div class="text-5xl">🎁</div>
-        <div id="glowing-year" class="glowing-2026">2026</div>
-        <div class="text-5xl">🎁</div>
-    </div>
+        <div id="toast-container" class="fixed top-8 right-8 z-[200] space-y-4 pointer-events-none"></div>
+    </div> <!-- End main-content -->
 
     <script>
-        // Initialize LED lights
-        function initLEDs() {
-            const container = document.getElementById('leds');
-            const colors = ['#f87171', '#fbbf24', '#34d399', '#60a5fa', '#f472b6'];
-            for (let i = 0; i < 40; i++) {
-                const led = document.createElement('div');
-                led.className = 'led-light';
-                led.style.backgroundColor = colors[i % colors.length];
-                led.style.animationDelay = (Math.random() * 2) + 's';
-                container.appendChild(led);
-            }
-        }
-        initLEDs();
-
         class NotificationManager {
             static show(message, type = 'info') {
                 const container = document.getElementById('toast-container');
@@ -409,8 +508,10 @@
         class SoundManager {
             constructor() {
                 this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                this.muted = false;
             }
             play(freq, type = 'sine', duration = 0.1) {
+                if (this.muted) return;
                 const osc = this.ctx.createOscillator();
                 const gain = this.ctx.createGain();
                 osc.type = type;
@@ -421,6 +522,12 @@
                 gain.connect(this.ctx.destination);
                 osc.start();
                 osc.stop(this.ctx.currentTime + duration);
+            }
+            toggleMute() {
+                this.muted = !this.muted;
+                document.getElementById('mute-icon').innerText = this.muted ? '🔇' : '🔊';
+                NotificationManager.show(this.muted ? 'Sound Muted' : 'Sound On', 'info');
+                this.playClick();
             }
             playSuccess() { this.play(880, 'sine', 0.2); this.play(1100, 'sine', 0.2); }
             playError() { this.play(220, 'square', 0.3); }
@@ -433,6 +540,18 @@
         }
 
         const sounds = new SoundManager();
+
+        // --- Theme Management ---
+        function toggleTheme() {
+            const body = document.body;
+            const current = body.getAttribute('data-theme');
+            const newTheme = current === 'dark' ? 'light' : 'dark';
+            body.setAttribute('data-theme', newTheme);
+            document.getElementById('theme-icon').innerText = newTheme === 'dark' ? '☀️' : '🌙';
+            sounds.playClick();
+            NotificationManager.show(`${newTheme.charAt(0).toUpperCase() + newTheme.slice(1)} Mode Active`, 'info');
+        }
+
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         let particles = [];
@@ -443,64 +562,85 @@
         resize();
 
         // --- Countdown ---
-        const target = new Date('December 26, 2025 02:15:00').getTime();
-        let celebrationTriggered = false;
+        const target = new Date('January 01, 2026 01:00:00').getTime();
+        let countsRevealed = false;
 
-        function startCelebration() {
-            if (celebrationTriggered) return;
-            celebrationTriggered = true;
-            
-            // Remove countdown elements
-            document.getElementById('countdown-header').classList.add('hidden');
-            document.getElementById('celebration-header').classList.remove('hidden');
-            
-            // Apply new theme
-            document.body.classList.add('celebration-theme');
-            document.getElementById('glowing-year').style.display = 'block';
+        const timerInterval = setInterval(() => {
+            const now = new Date().getTime();
+            const diff = target - now;
 
-            // Double interactivity: Enhanced Particles
-            setInterval(() => {
-                if (Math.random() > 0.7) {
-                    const x = Math.random() * window.innerWidth;
-                    particles.push(new Particle(x, window.innerHeight, `hsl(${Math.random() * 360}, 70%, 70%)`));
-                }
-            }, 50);
-
-            // Re-render games to show all
-            renderGames();
-            
-            // Massive firework show
-            const celebrationInterval = setInterval(() => {
-                const x = Math.random() * window.innerWidth;
-                const y = Math.random() * window.innerHeight;
-                ignite(x, y);
-                score += 10;
-                updateScore();
-            }, 100);
-
-            setTimeout(() => clearInterval(celebrationInterval), 10000);
-            
-            NotificationManager.show('WELCOME TO 2026! 🎆', 'success');
-            NotificationManager.show('NEW GAMES UNLOCKED! 🎮', 'info');
-            sounds.playSuccess();
-        }
-
-        const countdownInterval = setInterval(() => {
-            const diff = target - new Date().getTime();
             if (diff <= 0) {
-                clearInterval(countdownInterval);
-                document.getElementById('days').innerText = '00';
-                document.getElementById('hours').innerText = '00';
-                document.getElementById('minutes').innerText = '00';
-                document.getElementById('seconds').innerText = '00';
-                startCelebration();
+                clearInterval(timerInterval);
+                revealMainContent();
                 return;
             }
-            document.getElementById('days').innerText = String(Math.floor(diff / 86400000)).padStart(2, '0');
-            document.getElementById('hours').innerText = String(Math.floor((diff % 86400000) / 3600000)).padStart(2, '0');
-            document.getElementById('minutes').innerText = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
-            document.getElementById('seconds').innerText = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+
+            const d = String(Math.floor(diff / 86400000)).padStart(2, '0');
+            const h = String(Math.floor((diff % 86400000) / 3600000)).padStart(2, '0');
+            const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
+            const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+
+            // Update Landing Screen
+            const lD = document.getElementById('landing-days');
+            const lH = document.getElementById('landing-hours');
+            const lM = document.getElementById('landing-minutes');
+            const lS = document.getElementById('landing-seconds');
+
+            if (lD) lD.innerText = d;
+            if (lH) lH.innerText = h;
+            if (lM) lM.innerText = m;
+            if (lS) lS.innerText = s;
+
+            // Update Main Screen
+            const mD = document.getElementById('days');
+            const mH = document.getElementById('hours');
+            const mM = document.getElementById('minutes');
+            const mS = document.getElementById('seconds');
+
+            if (mD) mD.innerText = d;
+            if (mH) mH.innerText = h;
+            if (mM) mM.innerText = m;
+            if (mS) mS.innerText = s;
         }, 1000);
+
+        function revealMainContent() {
+            if (countsRevealed) return;
+            countsRevealed = true;
+
+            const landing = document.getElementById('landing-screen');
+            const main = document.getElementById('main-content');
+            const overlay = document.getElementById('celebration-overlay');
+            const transitionCont = document.querySelector('.year-transition');
+
+            // 1. Fade out landing, show celebration overlay
+            landing.style.opacity = '0';
+            setTimeout(() => {
+                landing.classList.add('hidden');
+                overlay.classList.add('active');
+
+                // 2. Perform 2025 -> 2026 animation
+                setTimeout(() => {
+                    transitionCont.classList.add('active-transition');
+
+                    // Fireworks during animation (No score bonus)
+                    igniteSpread(false);
+
+                    // 3. Reveal main content after animation
+                    setTimeout(() => {
+                        overlay.style.opacity = '0';
+                        main.classList.remove('hidden');
+                        setTimeout(() => {
+                            main.classList.remove('opacity-0');
+                            overlay.classList.remove('active');
+                            igniteSpread(false);
+                            setTimeout(() => igniteSpread(false), 500);
+                        }, 500);
+                    }, 2000);
+                }, 1000);
+            }, 1000);
+
+            NotificationManager.show('HAPPY NEW YEAR 2026! 🎊', 'success');
+        }
 
         // --- Particles ---
         class Particle {
@@ -528,12 +668,13 @@
             for (let i = 0; i < 30; i++) particles.push(new Particle(x, y, colors[Math.floor(Math.random() * colors.length)]));
         }
 
-        function igniteSpread() {
+        function igniteSpread(addScore = true) {
             for (let i = 0; i < 8; i++) {
                 setTimeout(() => {
                     const x = Math.random() * window.innerWidth;
                     const y = Math.random() * window.innerHeight;
-                    ignite(x, y); score += 5; updateScore();
+                    ignite(x, y);
+                    if (addScore) { score += 5; updateScore(); }
                 }, i * 150);
             }
         }
@@ -577,53 +718,17 @@
             { id: 'mine', icon: '💣', name: 'Minesweeper' },
             { id: 'flap', icon: '🐦', name: 'Flappy Clone' },
             { id: 'space', icon: '👾', name: 'Space War' },
-            { id: 'tetris', icon: '🏗️', name: 'Tetris' },
-            { id: 'neon', icon: '🏮', name: 'Neon Dash' },
-            { id: 'echo', icon: '📡', name: 'Echo Memory' },
-            { id: 'gravity', icon: '🌌', name: 'Gravity Flip' },
-            { id: 'rhythm', icon: '🥁', name: 'Beat Master' },
-            { id: 'wordle', icon: '📝', name: 'Word Guess' },
-            { id: 'color', icon: '🌈', name: 'Color Sort' },
-            { id: 'jump', icon: '🦘', name: 'Dino Jump' },
-            { id: 'stack', icon: '📦', name: 'Stacker' },
-            { id: 'bird', icon: '🦉', name: 'Owl Glide' },
-            { id: 'maze', icon: '🌀', name: 'Maze Run' },
-            { id: 'slice', icon: '⚔️', name: 'Fruit Ninja' },
-            { id: 'draw', icon: '🖌️', name: 'Quick Draw' },
-            { id: 'pipe', icon: '🚿', name: 'Pipe Connect' },
-            { id: 'shoot', icon: '🎯', name: 'Bullseye' },
-            { id: 'block', icon: '🧊', name: 'Block Blast' },
-            { id: 'spin', icon: '🎡', name: 'Lucky Spin' },
-            { id: 'dig', icon: '⛏️', name: 'Mine Digger' },
-            { id: 'surf', icon: '🏄', name: 'Cyber Surf' },
-            { id: 'golf', icon: '⛳', name: 'Mini Golf' },
-            { id: 'chef', icon: '🍳', name: 'Pizza Chef' },
-            { id: 'zoo', icon: '🐼', name: 'Zoo Match' },
-            { id: 'tank', icon: '🚜', name: 'Tank War' },
-            { id: 'fly', icon: '🚁', name: 'Copter' },
-            { id: 'box', icon: '🥊', name: 'Boxer' },
-            { id: 'math2', icon: '🔢', name: 'Math Rush' },
-            { id: 'swim', icon: '🐟', name: 'Sea Quest' },
-            { id: 'hero', icon: '🦸', name: 'Hero Tap' },
-            { id: 'fire', icon: '🔥', name: 'Fire Control' }
+            { id: 'tetris', icon: '🏗️', name: 'Tetris' }
         ];
 
-        function renderGames() {
-            const grid = document.getElementById('games-grid');
-            grid.innerHTML = '';
-            
-            // Show only first 28 games before timer, all 56+ after
-            const visibleGames = celebrationTriggered ? games : games.slice(0, 28);
-            
-            visibleGames.forEach(g => {
-                const div = document.createElement('div');
-                div.className = 'game-icon glass p-5 flex flex-col items-center gap-3 text-center';
-                div.onclick = () => launchGame(g.id);
-                div.innerHTML = `<span class="text-4xl">${g.icon}</span><span class="text-[10px] font-black uppercase tracking-widest text-slate-500">${g.name}</span>`;
-                grid.appendChild(div);
-            });
-        }
-        renderGames();
+        const grid = document.getElementById('games-grid');
+        games.forEach(g => {
+            const div = document.createElement('div');
+            div.className = 'game-icon glass p-5 flex flex-col items-center gap-3 text-center';
+            div.onclick = () => launchGame(g.id);
+            div.innerHTML = `<span class="text-4xl mb-2">${g.icon}</span><span class="text-[10px] font-bold uppercase tracking-widest opacity-60">${g.name}</span>`;
+            grid.appendChild(div);
+        });
 
         // --- Game Engine ---
         let gameTimer = null;
@@ -635,12 +740,6 @@
             if (gameTimer) clearInterval(gameTimer);
 
             const game = games.find(g => g.id === id);
-            
-            // Post-timer specific check (logic placeholder)
-            if (!celebrationTriggered && games.indexOf(game) >= 28) {
-                content.innerHTML = `<div class="text-center p-10"><h2 class="text-3xl font-black mb-4">LOCKED 🔒</h2><p class="text-slate-400 font-bold">This game unlocks in 2026!</p></div>`;
-                return;
-            }
 
             switch (id) {
                 case 'pop': setupBalloonPop(content); break;
@@ -671,164 +770,12 @@
                 case 'flap': setupFlappyBird(content); break;
                 case 'space': setupSpaceInvaders(content); break;
                 case 'tetris': setupTetris(content); break;
-                case 'neon': setupNeonDash(content); break;
-                case 'echo': setupEchoMemory(content); break;
-                case 'gravity': setupGravityFlip(content); break;
-                case 'rhythm': setupBeatMaster(content); break;
-                case 'wordle': setupWordGuess(content); break;
-                case 'color': setupColorSort(content); break;
-                case 'jump': setupDinoJump(content); break;
-                case 'stack': setupStacker(content); break;
-                case 'bird': setupOwlGlide(content); break;
-                case 'maze': setupMazeRun(content); break;
-                case 'slice': setupFruitNinja(content); break;
-                case 'draw': setupQuickDraw(content); break;
-                case 'pipe': setupPipeConnect(content); break;
-                case 'shoot': setupBullseye(content); break;
-                case 'block': setupBlockBlast(content); break;
-                case 'spin': setupLuckySpin(content); break;
-                case 'dig': setupMineDigger(content); break;
-                case 'surf': setupCyberSurf(content); break;
-                case 'golf': setupMiniGolf(content); break;
-                case 'chef': setupPizzaChef(content); break;
-                case 'zoo': setupZooMatch(content); break;
-                case 'tank': setupTankWar(content); break;
-                case 'fly': setupCopter(content); break;
-                case 'box': setupBoxer(content); break;
-                case 'math2': setupMathRush(content); break;
-                case 'swim': setupSeaQuest(content); break;
-                case 'hero': setupHeroTap(content); break;
-                case 'fire': setupFireControl(content); break;
             }
         }
 
-        function setupNeonDash(parent) {
-            parent.innerHTML = `<h3 class="text-2xl font-black mb-4">Neon Dash 🏮</h3><div id="game-area" class="bg-slate-900 border-4 border-blue-500 rounded-3xl overflow-hidden relative"><div id="neon-player" class="absolute w-8 h-8 bg-blue-400 shadow-[0_0_15px_#60a5fa] rounded-lg" style="bottom: 20px; left: 50px;"></div></div>`;
-            const area = document.getElementById('game-area');
-            const player = document.getElementById('neon-player');
-            let isJumping = false;
-            area.onclick = () => { if(!isJumping) { isJumping = true; player.animate([{bottom: '20px'}, {bottom: '120px'}, {bottom: '20px'}], {duration: 600, easing: 'ease-out'}).onfinish = () => isJumping = false; } };
-            gameTimer = setInterval(() => {
-                const obs = document.createElement('div');
-                obs.className = 'absolute bottom-[20px] w-6 h-10 bg-red-500 shadow-[0_0_10px_#ef4444]';
-                obs.style.right = '-20px';
-                area.appendChild(obs);
-                obs.animate([{right: '-20px'}, {right: '100%'}], {duration: 2000}).onfinish = () => {
-                    score += 5; updateScore(); obs.remove();
-                };
-            }, 1500);
-        }
+        function closeModal() { document.getElementById('game-modal').classList.add('hidden'); if (gameTimer) clearInterval(gameTimer); }
 
-        function setupEchoMemory(parent) {
-            const sequence = [];
-            let userIndex = 0;
-            const colors = ['bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500'];
-            parent.innerHTML = `<h3 class="text-2xl font-black mb-4">Echo Memory 📡</h3><div class="grid grid-cols-2 gap-4 w-64 h-64" id="echo-grid"></div>`;
-            const grid = document.getElementById('echo-grid');
-            colors.forEach((c, i) => {
-                const b = document.createElement('div');
-                b.className = `${c} rounded-2xl cursor-pointer opacity-50 hover:opacity-100 transition-opacity`;
-                b.onclick = () => checkEcho(i);
-                grid.appendChild(b);
-            });
-            function nextRound() {
-                sequence.push(Math.floor(Math.random() * 4));
-                userIndex = 0;
-                let i = 0;
-                const interval = setInterval(() => {
-                    const b = grid.children[sequence[i]];
-                    b.classList.remove('opacity-50');
-                    setTimeout(() => b.classList.add('opacity-50'), 300);
-                    i++;
-                    if(i >= sequence.length) clearInterval(interval);
-                }, 600);
-            }
-            window.checkEcho = (i) => {
-                if(i === sequence[userIndex]) {
-                    userIndex++;
-                    if(userIndex === sequence.length) { score += 20; updateScore(); NotificationManager.show('Matched!', 'success'); nextRound(); }
-                } else { NotificationManager.show('Try Again!', 'error'); sequence.length = 0; nextRound(); }
-            };
-            nextRound();
-        }
-
-        function setupGravityFlip(parent) {
-            parent.innerHTML = `<h3 class="text-2xl font-black mb-4">Gravity Flip 🌌</h3><div id="game-area" class="bg-indigo-900 rounded-3xl relative overflow-hidden h-64"><div id="grav-ball" class="absolute w-8 h-8 bg-purple-400 rounded-full shadow-[0_0_20px_purple]" style="top: 0; left: 50%;"></div></div>`;
-            const area = document.getElementById('game-area');
-            const ball = document.getElementById('grav-ball');
-            let isDown = false;
-            area.onclick = () => {
-                isDown = !isDown;
-                ball.style.top = isDown ? 'calc(100% - 32px)' : '0';
-                ball.style.transition = 'top 0.3s ease-in-out';
-                score += 2; updateScore();
-            };
-        }
-
-        function setupBeatMaster(parent) {
-            parent.innerHTML = `<h3 class="text-2xl font-black mb-4">Beat Master 🥁</h3><div class="flex gap-4" id="beat-pads"></div>`;
-            const pads = ['🥁', '🎹', '🎸', '🎺'];
-            pads.forEach(p => {
-                const b = document.createElement('button');
-                b.className = 'glass w-20 h-20 text-4xl hover:scale-110 active:scale-90 transition-all';
-                b.innerText = p;
-                b.onclick = () => { sounds.play(200 + Math.random() * 800); score += 1; updateScore(); };
-                document.getElementById('beat-pads').appendChild(b);
-            });
-        }
-
-        function setupWordGuess(parent) {
-            const words = ['NEW', 'YEAR', 'MAGIC', 'PARTY', 'FUN'];
-            const word = words[Math.floor(Math.random() * words.length)];
-            parent.innerHTML = `<div class="text-center space-y-4"><h3 class="text-2xl font-black">Word Guess 📝</h3><div class="text-4xl tracking-widest font-black">${word.split('').map(() => '_').join(' ')}</div><div class="flex gap-2 flex-wrap justify-center" id="keys"></div></div>`;
-            'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(l => {
-                const b = document.createElement('button');
-                b.className = 'glass p-2 w-10 h-10 font-bold';
-                b.innerText = l;
-                b.onclick = () => {
-                    if(word.includes(l)) { NotificationManager.show('Correct!', 'success'); score += 5; updateScore(); }
-                    else { b.style.opacity = '0.3'; }
-                };
-                document.getElementById('keys').appendChild(b);
-            });
-        }
-
-        function setupGenericGame(parent, name, icon) {
-            parent.innerHTML = `
-                <div class="text-center space-y-6">
-                    <div class="text-8xl animate-bounce-slow">${icon}</div>
-                    <h2 class="text-4xl font-black">${name}</h2>
-                    <p class="text-xl font-bold text-slate-400 italic">Click to generate energy!</p>
-                    <button onclick="score+=5; updateScore(); ignite(event.clientX, event.clientY);" class="px-10 py-5 bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-black rounded-2xl hover:scale-110 transition-all active:scale-95 shadow-xl">PLAY & COLLECT ⚡</button>
-                </div>
-            `;
-        }
-        
-        // Map remaining games to generic but interactive template
-        function setupColorSort(p) { setupGenericGame(p, 'Color Sort', '🌈'); }
-        function setupDinoJump(p) { setupGenericGame(p, 'Dino Jump', '🦘'); }
-        function setupStacker(p) { setupGenericGame(p, 'Stacker', '📦'); }
-        function setupOwlGlide(p) { setupGenericGame(p, 'Owl Glide', '🦉'); }
-        function setupMazeRun(p) { setupGenericGame(p, 'Maze Run', '🌀'); }
-        function setupFruitNinja(p) { setupGenericGame(p, 'Fruit Ninja', '⚔️'); }
-        function setupQuickDraw(p) { setupGenericGame(p, 'Quick Draw', '🖌️'); }
-        function setupPipeConnect(p) { setupGenericGame(p, 'Pipe Connect', '🚿'); }
-        function setupBullseye(p) { setupGenericGame(p, 'Bullseye', '🎯'); }
-        function setupBlockBlast(p) { setupGenericGame(p, 'Block Blast', '🧊'); }
-        function setupLuckySpin(p) { setupGenericGame(p, 'Lucky Spin', '🎡'); }
-        function setupMineDigger(p) { setupGenericGame(p, 'Mine Digger', '⛏️'); }
-        function setupCyberSurf(p) { setupGenericGame(p, 'Cyber Surf', '🏄'); }
-        function setupMiniGolf(p) { setupGenericGame(p, 'Mini Golf', '⛳'); }
-        function setupPizzaChef(p) { setupGenericGame(p, 'Pizza Chef', '🍳'); }
-        function setupZooMatch(p) { setupGenericGame(p, 'Zoo Match', '🐼'); }
-        function setupTankWar(p) { setupGenericGame(p, 'Tank War', '🚜'); }
-        function setupCopter(p) { setupGenericGame(p, 'Copter', '🚁'); }
-        function setupBoxer(p) { setupGenericGame(p, 'Boxer', '🥊'); }
-        function setupMathRush(p) { setupGenericGame(p, 'Math Rush', '🔢'); }
-        function setupSeaQuest(p) { setupGenericGame(p, 'Sea Quest', '🐟'); }
-        function setupHeroTap(p) { setupGenericGame(p, 'Hero Tap', '🦸'); }
-        function setupFireControl(p) { setupGenericGame(p, 'Fire Control', '🔥'); }
-
+        // --- Game Implementations ---
         function setupBalloonPop(parent) {
             parent.innerHTML = `<h3 class="text-2xl font-black text-center mb-4">Balloon Pop! 🎈</h3><div id="game-area" class="h-96 relative bg-sky-50 rounded-3xl overflow-hidden shadow-inner cursor-crosshair"></div>`;
             const area = document.getElementById('game-area');
@@ -872,17 +819,18 @@
 
             parent.innerHTML = `
                 <div class="text-center space-y-6">
-                    <h3 class="text-2xl font-black text-slate-800 uppercase tracking-tight">Kids Math! 🌈</h3>
-                    <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+                    <h3 class="text-2xl font-black uppercase tracking-tight">Kids Math! 🌈</h3>
+                    <div class="w-full bg-slate-100/10 h-3 rounded-full overflow-hidden">
                         <div id="math-timer" class="h-full bg-gradient-to-r from-blue-400 to-indigo-500 transition-all duration-1000" style="width: 100%"></div>
                     </div>
-                    <div class="text-7xl font-black text-slate-900 drop-shadow-sm">${displayA} ${op} ${displayB}</div>
+                    <div class="text-7xl font-black drop-shadow-sm">${displayA} ${op} ${displayB}</div>
                     <div class="grid grid-cols-2 gap-4 w-full">
                         ${[ans, ans + 2, ans - 1, ans + 5].filter(n => n >= 0).sort(() => Math.random() - 0.5).map(n =>
-                `<button onclick="checkMath(${n}, ${ans})" class="py-6 glass font-black text-4xl hover:bg-blue-600 hover:text-white transition-all transform hover:scale-105 active:scale-95 rounded-3xl border-b-8 border-slate-200">${n}</button>`
+                `<button onclick="checkMath(${n}, ${ans})" class="py-6 glass font-black text-4xl hover:bg-[var(--primary)] hover:text-white transition-all transform hover:scale-105 active:scale-95 rounded-3xl border-b-8 border-white/10">${n}</button>`
             ).join('')}
                     </div>
-                </div>`;
+                </div>
+`;
 
             const timerInt = setInterval(() => {
                 timeLeft--;
@@ -1109,8 +1057,8 @@
         }
 
         function setupGift(parent) {
-            parent.innerHTML = `<h3 class="text-2xl font-black text-center mb-4 text-slate-800">Mystery Boxes 📦</h3>
-                <p class="text-xs text-slate-400 text-center mb-8 uppercase font-black tracking-widest">Only one box has the prize!</p>
+            parent.innerHTML = `<h3 class="text-2xl font-black text-center mb-4">Mystery Boxes 📦</h3>
+                <p class="text-[10px] opacity-40 text-center mb-8 uppercase font-black tracking-widest">Only one box has the prize!</p>
                 <div id="game-area" class="flex items-center justify-center gap-6 h-48">
                     ${[0, 1, 2].map(i => `<div onclick="openGift(this)" class="gift-box text-8xl cursor-pointer hover:scale-110 active:scale-95 transition-all drop-shadow-xl hover:rotate-3">🎁</div>`).join('')}
                 </div>`;
@@ -1140,7 +1088,7 @@
         function setupPiano(parent) {
             const notes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
             const keys = ['A', 'S', 'D', 'F', 'G', 'H', 'J'];
-            parent.innerHTML = `<h3 class="text-2xl font-black">Magic Piano 🎹</h3><p class="text-xs text-slate-400">Use keys: A S D F G H J</p><div class="flex h-40 gap-1 w-full" id="piano-keys">
+            parent.innerHTML = `<h3 class="text-2xl font-black">Magic Piano 🎹</h3><p class="text-[10px] opacity-40 uppercase font-bold tracking-widest mb-4">Use keys: A S D F G H J</p><div class="flex h-40 gap-1 w-full" id="piano-keys">
                 ${notes.map((n, i) => `<div onclick="playNote(this)" data-note="${n}" class="flex-1 glass flex items-end justify-center pb-4 font-black hover:bg-blue-100 cursor-pointer active:h-36 transition-all border-b-4 border-slate-200">
                     <div class="flex flex-col items-center">
                         <span class="text-xs text-slate-300 font-bold">${keys[i]}</span>
@@ -1217,13 +1165,13 @@
 
         function setupShake(parent) {
             parent.innerHTML = `<h3 class="text-2xl font-black text-center mb-4">Shake Energy! 📱</h3>
-                <div id="phone" class="w-32 h-52 mx-auto glass rounded-[2rem] border-4 border-slate-800 flex flex-col items-center p-4 relative mb-6 shadow-2xl overflow-hidden transition-transform duration-100">
-                    <div class="w-12 h-1 bg-slate-800 rounded-full mb-8"></div>
+                <div id="phone" class="w-32 h-52 mx-auto glass rounded-[2rem] border-4 border-[var(--primary)] flex flex-col items-center p-4 relative mb-6 shadow-2xl overflow-hidden transition-transform duration-100">
+                    <div class="w-12 h-1 bg-[var(--primary)]/20 rounded-full mb-8"></div>
                     <div class="w-20 h-20 bg-blue-500 rounded-full flex items-center justify-center text-4xl text-white shadow-lg animate-pulse">⚡</div>
                     <div id="shake-progress" class="absolute bottom-0 left-0 right-0 bg-blue-500/30 w-full" style="height: 0%"></div>
-                    <div class="absolute bottom-4 w-8 h-8 rounded-full border-2 border-slate-800"></div>
+                    <div class="absolute bottom-4 w-8 h-8 rounded-full border-2 border-[var(--primary)]/20"></div>
                 </div>
-                <p class="text-slate-400 text-center font-bold mb-4">CLICK FAST TO CHARGE!</p>
+                <p class="opacity-50 text-center font-bold mb-4 uppercase tracking-widest text-xs">CLICK FAST TO CHARGE!</p>
                 <button onclick="doShake()" class="w-full py-5 bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-black rounded-2xl shadow-xl transform active:scale-95 transition-all">SHAKE!</button>`;
 
             let charge = 0;
@@ -1248,15 +1196,18 @@
         }
 
         function setupSimon(parent) {
-            parent.innerHTML = `<h3 class="text-2xl font-black">Simon Says 🔴</h3>
-                <div class="grid grid-cols-2 gap-4 max-w-[300px] mx-auto" id="simon-grid">
-                    <div onclick="checkSimon(0)" data-idx="0" class="h-32 bg-red-500/80 rounded-2xl cursor-pointer hover:scale-105 active:scale-95 transition-all shadow-lg border-b-4 border-red-700"></div>
-                    <div onclick="checkSimon(1)" data-idx="1" class="h-32 bg-blue-500/80 rounded-2xl cursor-pointer hover:scale-105 active:scale-95 transition-all shadow-lg border-b-4 border-blue-700"></div>
-                    <div onclick="checkSimon(2)" data-idx="2" class="h-32 bg-green-500/80 rounded-2xl cursor-pointer hover:scale-105 active:scale-95 transition-all shadow-lg border-b-4 border-green-700"></div>
-                    <div onclick="checkSimon(3)" data-idx="3" class="h-32 bg-yellow-500/80 rounded-2xl cursor-pointer hover:scale-105 active:scale-95 transition-all shadow-lg border-b-4 border-yellow-700"></div>
-                </div>
-                <div id="simon-status" class="mt-4 text-center font-black text-slate-900">Click START to play!</div>
-                <button onclick="startSimon()" id="simon-start" class="w-full py-4 bg-slate-900 text-white font-black rounded-2xl mt-4 shadow-xl">START GAME</button>`;
+            parent.innerHTML = `
+                <div class="text-center w-full max-w-md mx-auto">
+                    <h3 class="text-3xl font-black mb-8">Simon Says 🔴</h3>
+                    <div class="grid grid-cols-2 gap-6 p-4 bg-slate-900/10 rounded-[2.5rem] shadow-inner mb-6" id="simon-grid">
+                        <div onclick="checkSimon(0)" class="h-40 bg-red-500 rounded-3xl cursor-pointer hover:scale-105 active:scale-95 transition-all shadow-[0_8px_0_rgb(185,28,28)] active:shadow-none active:translate-y-2"></div>
+                        <div onclick="checkSimon(1)" class="h-40 bg-blue-500 rounded-3xl cursor-pointer hover:scale-105 active:scale-95 transition-all shadow-[0_8px_0_rgb(29,78,216)] active:shadow-none active:translate-y-2"></div>
+                        <div onclick="checkSimon(2)" class="h-40 bg-green-500 rounded-3xl cursor-pointer hover:scale-105 active:scale-95 transition-all shadow-[0_8px_0_rgb(21,128,61)] active:shadow-none active:translate-y-2"></div>
+                        <div onclick="checkSimon(3)" class="h-40 bg-yellow-500 rounded-3xl cursor-pointer hover:scale-105 active:scale-95 transition-all shadow-[0_8px_0_rgb(161,98,7)] active:shadow-none active:translate-y-2"></div>
+                    </div>
+                    <div id="simon-status" class="text-xl font-bold opacity-60 mb-6">Click START to test your memory!</div>
+                    <button onclick="startSimon()" id="simon-start" class="w-full py-6 bg-[var(--primary)] text-white font-black text-xl rounded-3xl shadow-xl hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-widest">START GAME</button>
+                </div>`;
         }
         let simonSeq = [];
         let simonInput = [];
@@ -1322,11 +1273,11 @@
             let board = ['', '', '', '', '', '', '', '', ''];
             let active = true;
             parent.innerHTML = `
-                <h3 class="text-2xl font-black text-center mb-4 text-slate-800">Tic-Tac-Toe ❌</h3>
+                <h3 class="text-2xl font-black text-center mb-4">Tic-Tac-Toe ❌</h3>
                 <div class="grid grid-cols-3 gap-4 w-full max-w-[300px] mx-auto mb-4" id="ttt-grid">
-                    ${board.map((_, i) => `<div onclick="playTTT(${i})" data-idx="${i}" class="h-24 glass flex items-center justify-center text-5xl font-black cursor-pointer hover:bg-white/50 transition-all rounded-3xl border-b-8 border-slate-200"></div>`).join('')}
+                    ${board.map((_, i) => `<div onclick="playTTT(${i})" data-idx="${i}" class="h-24 glass flex items-center justify-center text-5xl font-black cursor-pointer hover:bg-white/10 transition-all rounded-3xl border-b-8 border-white/5"></div>`).join('')}
                 </div>
-                <div id="ttt-status" class="text-center font-bold text-slate-600 bg-slate-50 py-2 px-6 rounded-full inline-block mx-auto mb-2">Your turn (X)</div>`;
+                <div id="ttt-status" class="text-center font-bold opacity-60 bg-[var(--primary)]/5 py-2 px-6 rounded-full inline-block mx-auto mb-2">Your turn (X)</div>`;
 
             window.playTTT = (idx) => {
                 if (!active || board[idx] !== '') return;
@@ -1386,7 +1337,7 @@
                 const cells = document.querySelectorAll('#ttt-grid > div');
                 board.forEach((b, i) => {
                     cells[i].innerText = b;
-                    if (b) cells[i].className = `h-24 glass flex items-center justify-center text-4xl font-black rounded-2xl border-b-4 transition-all ${b === 'X' ? 'text-blue-600 border-blue-200' : 'text-red-500 border-red-200'}`;
+                    if (b) cells[i].className = `h-24 glass flex items-center justify-center text-4xl font-black rounded-2xl border-b-4 transition-all ${b === 'X' ? 'text-[var(--primary)] border-[var(--primary)]/20 shadow-[0_5px_15px_rgba(14,165,233,0.3)]' : 'text-[var(--accent)] border-[var(--accent)]/20 shadow-[0_5px_15px_rgba(236,72,153,0.3)]'}`;
                 });
                 sounds.playClick();
             };
@@ -1410,8 +1361,8 @@
             let timeLeft = 20;
             let mScore = 0;
             parent.innerHTML = `
-                <h3 class="text-2xl font-black text-center mb-4 text-slate-800">Whack-a-Mole 🔨</h3>
-                <div class="flex justify-between mb-4 w-full max-w-[400px] mx-auto px-4 font-bold text-slate-600">
+                <h3 class="text-2xl font-black text-center mb-4">Whack-a-Mole 🔨</h3>
+                <div class="flex justify-between mb-4 w-full max-w-[400px] mx-auto px-4 font-bold opacity-60">
                     <div>Time: <span id="mole-time">20</span>s</div>
                     <div>Score: <span id="mole-score">0</span></div>
                 </div>
@@ -1460,9 +1411,9 @@
 
         function setupSnake(parent) {
             parent.innerHTML = `
-                <h3 class="text-2xl font-black text-center mb-4 text-slate-800">Snake 🐍</h3>
+                <h3 class="text-2xl font-black text-center mb-4">Snake 🐍</h3>
                 <canvas id="snake-canvas" class="bg-slate-900 rounded-2xl mx-auto shadow-2xl" width="300" height="300"></canvas>
-                <div class="mt-4 text-center text-slate-400 font-bold">Use ARROW KEYS to move</div>`;
+                <div class="mt-4 text-center font-bold">Use ARROW KEYS to move</div>`;
 
             const canvas = document.getElementById('snake-canvas');
             const ctx = canvas.getContext('2d');
@@ -1535,9 +1486,9 @@
 
         function setupPong(parent) {
             parent.innerHTML = `
-                <h3 class="text-2xl font-black text-center mb-4 text-slate-800">Ping Pong 🏓</h3>
+                <h3 class="text-2xl font-black text-center mb-4">Ping Pong 🏓</h3>
                 <canvas id="pong-canvas" class="bg-slate-900 rounded-2xl mx-auto shadow-2xl" width="400" height="300"></canvas>
-                <p class="mt-4 text-center text-slate-400 font-bold">Use Mouse/Touch to move paddle</p>`;
+                <p class="mt-4 text-center font-bold">Use Mouse/Touch to move paddle</p>`;
 
             const canvas = document.getElementById('pong-canvas');
             const ctx = canvas.getContext('2d');
@@ -1570,8 +1521,10 @@
 
                 if (ball.y < 0 || ball.y > canvas.height) ball.dy *= -1;
 
-                // AI
-                aiPaddle.y += (ball.y - (aiPaddle.y + aiPaddle.height / 2)) * 0.1;
+                // Tough AI logic
+                const paddleMid = aiPaddle.y + aiPaddle.height / 2;
+                const reactionSpeed = 0.15 + (score / 10000); // gets faster as game goes
+                aiPaddle.y += (ball.y - paddleMid) * reactionSpeed;
 
                 if (ball.x < paddle.width && ball.y > paddle.y && ball.y < paddle.y + paddle.height) {
                     ball.dx *= -1.1; sounds.playClick();
@@ -1598,7 +1551,7 @@
 
         function setupBreakout(parent) {
             parent.innerHTML = `
-                <h3 class="text-2xl font-black text-center mb-4 text-slate-800">Breakout 🧱</h3>
+                <h3 class="text-2xl font-black text-center mb-4">Breakout 🧱</h3>
                 <canvas id="breakout-canvas" class="bg-slate-900 rounded-2xl mx-auto shadow-2xl" width="400" height="300"></canvas>`;
 
             const canvas = document.getElementById('breakout-canvas');
@@ -1679,11 +1632,11 @@
 
             const updateUI = () => {
                 parent.innerHTML = `
-                <h3 class="text-2xl font-black text-center mb-4 text-slate-800 tracking-tight">Hangman Challenge 🪢</h3>
+                <h3 class="text-2xl font-black text-center mb-4 tracking-tight">Hangman Challenge 🪢</h3>
                 <div class="flex flex-col md:flex-row gap-8 items-center justify-center w-full max-w-2xl mx-auto">
-                    <canvas id="hang-canvas" width="200" height="200" class="bg-slate-50 rounded-2xl shadow-inner"></canvas>
+                    <canvas id="hang-canvas" width="200" height="200" class="bg-[var(--primary)]/5 rounded-2xl shadow-inner"></canvas>
                     <div class="flex-1 space-y-6 w-full">
-                        <div class="text-center text-4xl tracking-[0.5em] font-black text-slate-900 drop-shadow-sm">
+                        <div class="text-center text-4xl tracking-[0.5em] font-black drop-shadow-sm">
                             ${word.split('').map(l => guessed.includes(l) ? l : '_').join('')}
                         </div>
                         <div class="grid grid-cols-6 gap-2 w-full">
@@ -1783,17 +1736,18 @@
             let qScore = 0;
 
             const nextQ = () => {
-                if (cur >= qs.length) {
+                const totalQs = pool.length;
+                if (cur >= totalQs) {
                     score += qScore * 25; updateScore();
-                    NotificationManager.show(`Quiz Over! Score: ${qScore}/${pool.length}`, 'success');
-                    launchGame('quiz');
+                    NotificationManager.show(`Quiz Over! Score: ${qScore}/${totalQs}`, 'success');
+                    closeModal();
                     return;
                 }
-                const item = qs[cur];
+                const item = pool[cur];
                 parent.innerHTML = `
-                    <h3 class="text-2xl font-black text-center mb-6 text-slate-800 tracking-tight">Easy Quiz! 🌟</h3>
-                    <div class="mb-4 text-xs font-black text-slate-400 tracking-widest uppercase text-center">Question ${cur + 1} of ${qs.length}</div>
-                    <div class="text-xl font-bold mb-8 text-slate-900">${item.q}</div>
+                    <h3 class="text-2xl font-black text-center mb-6 tracking-tight">Easy Quiz! 🌟</h3>
+                    <div class="mb-4 text-xs font-black opacity-40 tracking-widest uppercase text-center">Question ${cur + 1} of ${totalQs}</div>
+                    <div class="text-xl font-bold mb-8">${item.q}</div>
                     <div class="grid gap-4 w-full">
                         ${item.a.map((opt, i) => `<button onclick="checkQuiz(${i})" class="w-full py-4 glass text-left px-6 font-bold hover:bg-blue-600 hover:text-white transition-all rounded-2xl">${opt}</button>`).join('')}
                     </div>`;
@@ -1831,10 +1785,10 @@
 
             const drawBoard = () => {
                 parent.innerHTML = `
-                    <h3 class="text-2xl font-black text-center mb-4 text-slate-800">Slide Puzzle 🔢</h3>
-                    <div class="grid grid-cols-3 gap-2 max-w-[300px] mx-auto" id="puzzle-grid">
+                    <h3 class="text-2xl font-black text-center mb-6">Slide Puzzle 🔢</h3>
+                    <div class="grid grid-cols-3 gap-3 w-full max-w-[360px] mx-auto p-4 glass rounded-[2rem]" id="puzzle-grid">
                         ${tiles.map((t, i) => `
-                            <div onclick="moveTile(${i})" class="h-20 glass flex items-center justify-center text-2xl font-black cursor-pointer rounded-xl border-b-4 ${t === null ? 'opacity-0 pointer-events-none' : 'border-slate-200'}">
+                            <div onclick="moveTile(${i})" class="aspect-square glass flex items-center justify-center text-3xl font-black cursor-pointer rounded-2xl border-b-8 transition-all ${t === null ? 'opacity-0 pointer-events-none' : 'border-slate-200 hover:bg-white/50 hover:scale-105 active:scale-95'}">
                                 ${t || ''}
                             </div>
                         `).join('')}
@@ -1864,7 +1818,7 @@
 
             const drawBoard = () => {
                 parent.innerHTML = `
-                    <h3 class="text-2xl font-black text-center mb-4 text-slate-800">Connect 4 🟡</h3>
+                    <h3 class="text-2xl font-black text-center mb-4">Connect 4 🟡</h3>
                     <div class="grid grid-cols-7 gap-2 bg-blue-600 p-4 rounded-3xl shadow-2xl mx-auto" id="c4-grid">
                         ${board.map((row, r) => row.map((cell, c) => `
                             <div onclick="dropC4(${c})" class="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-blue-800 bg-blue-900 shadow-inner flex items-center justify-center p-1">
@@ -1936,8 +1890,8 @@
 
             const draw = () => {
                 parent.innerHTML = `
-                    <h3 class="text-2xl font-black text-center mb-4 text-slate-800">Minesweeper 💣</h3>
-                    <div class="flex justify-between mb-2 text-sm font-bold text-slate-500">
+                    <h3 class="text-2xl font-black text-center mb-4">Minesweeper 💣</h3>
+                    <div class="flex justify-between mb-2 text-sm font-bold opacity-60">
                       <div>Mines: ${mines}</div>
                       <div>Right-click to flag 🚩</div>
                     </div>
@@ -2011,12 +1965,12 @@
 
         function setupFlappyBird(parent) {
             parent.innerHTML = `
-                <h3 class="text-2xl font-black text-center mb-4 text-slate-800">Flappy Clone 🐦</h3>
+                <h3 class="text-2xl font-black text-center mb-4">Flappy Clone 🐦</h3>
                 <div class="relative mx-auto" style="width: 320px;">
                     <canvas id="flap-canvas" class="bg-sky-400 rounded-2xl shadow-2xl" width="320" height="400"></canvas>
                     <div id="flap-score" class="absolute top-4 left-4 glass px-4 py-1 font-black text-white text-xl shadow-lg">0</div>
                 </div>
-                <p class="mt-4 text-center text-slate-400 font-bold">Space/Up/Click to Fly</p>`;
+                <p class="mt-4 text-center opacity-50 font-bold uppercase tracking-widest text-xs">Space/Up/Click to Fly</p>`;
             const canvas = document.getElementById('flap-canvas'), ctx = canvas.getContext('2d');
             let bird = { y: 200, v: 0, r: 14, angle: 0 }, gravity = 0.4, pipes = [], pipeInterval = 0, fScore = 0;
 
@@ -2117,13 +2071,13 @@
 
         function setupSpaceInvaders(parent) {
             parent.innerHTML = `
-                <h3 class="text-2xl font-black text-center mb-4 text-slate-800">Space War 👾</h3>
+                <h3 class="text-2xl font-black text-center mb-4">Space War 👾</h3>
                 <canvas id="space-canvas" class="bg-slate-900 rounded-2xl mx-auto shadow-2xl" width="400" height="300"></canvas>
-                <div class="flex justify-between mt-4 px-8 font-bold text-slate-400">
+                <div class="flex justify-between mt-4 px-8 font-bold opacity-40">
                     <div>Level: <span id="space-lvl">1</span></div>
                     <div>Score: <span id="space-score">0</span></div>
                 </div>
-                <p class="text-center text-slate-500 text-xs mt-2">Arrows/WASD to Move • Space to Shoot</p>`;
+                <p class="text-center opacity-30 text-[10px] mt-2 font-bold uppercase tracking-widest">Arrows/WASD to Move • Space to Shoot</p>`;
             const canvas = document.getElementById('space-canvas'), ctx = canvas.getContext('2d');
             let ship = { x: 180, y: 270, w: 40, h: 20 }, bullets = [], invaders = [], direction = 1, moveCount = 0;
             let level = 1, sScore = 0, keys = {};
@@ -2224,7 +2178,7 @@
 
         function setupTetris(parent) {
             parent.innerHTML = `
-                <h3 class="text-2xl font-black text-center mb-4 text-slate-800">Tetris 🏗️</h3>
+                <h3 class="text-2xl font-black text-center mb-4">Tetris 🏗️</h3>
                 <canvas id="tetris-canvas" class="bg-slate-800 rounded-xl mx-auto shadow-2xl" width="200" height="360"></canvas>
                 <div class="mt-4 text-center text-slate-400 font-bold uppercase tracking-widest text-xs">Arrows to Move • Up to Rotate</div>`;
             const canvas = document.getElementById('tetris-canvas'), ctx = canvas.getContext('2d'), W = 200, H = 360, B = 20;
@@ -2384,8 +2338,11 @@
             document.getElementById('modal-content').innerHTML = `
                 <div class="text-center space-y-8 p-4 w-full">
                     <div class="text-7xl animate-bounce">🤣</div>
-                    <h3 class="text-3xl font-black text-slate-900 leading-tight p-4 glass rounded-3xl mx-auto max-w-lg">${joke}</h3>
-                    <button onclick="closeModal()" class="w-full max-w-sm py-5 bg-blue-600 text-white font-black rounded-2xl shadow-xl hover:scale-105 transition-all mx-auto block uppercase tracking-widest">Haha! Next! 🎉</button>
+                    <h3 class="text-3xl font-black leading-tight p-8 glass rounded-[2.5rem] mx-auto max-w-lg shadow-inner border border-white/5 relative overflow-hidden">
+                        <div class="absolute inset-0 bg-gradient-to-br from-[var(--primary)]/5 to-transparent pointer-events-none"></div>
+                        <span class="relative z-10">${joke}</span>
+                    </h3>
+                    <button onclick="closeModal()" class="w-full max-w-sm py-6 bg-[var(--primary)] text-white font-black rounded-[1.5rem] shadow-[0_10px_30px_rgba(14,165,233,0.3)] hover:scale-105 hover:shadow-[0_15px_40px_rgba(14,165,233,0.4)] transition-all mx-auto block uppercase tracking-widest text-lg">Haha! Next! 🎉</button>
                 </div>`;
         }
 
