@@ -1,0 +1,2397 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>2026 | New Year Adventure</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="src/index.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #06b6d4;
+            --accent: #d946ef;
+        }
+
+        body {
+            background: #ffffff;
+            color: #0f172a;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+            transition: all 1s ease;
+        }
+
+        body.celebration-theme {
+            background: #0f172a;
+            color: #f8fafc;
+        }
+
+        body.celebration-theme .mesh-gradient {
+            background: 
+                radial-gradient(circle at 10% 10%, #1e293b 0%, transparent 40%),
+                radial-gradient(circle at 90% 10%, #1e1b4b 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, #0f172a 0%, transparent 100%),
+                linear-gradient(135deg, #020617 0%, #0f172a 100%);
+        }
+
+        body.celebration-theme .glass {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #f8fafc;
+        }
+
+        body.celebration-theme h1, 
+        body.celebration-theme h2,
+        body.celebration-theme .text-slate-900 {
+            color: #f8fafc !important;
+        }
+
+        .mesh-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 10% 10%, #f0f9ff 0%, transparent 40%),
+                radial-gradient(circle at 90% 10%, #f5f3ff 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, #ffffff 0%, transparent 100%),
+                linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            z-index: -2;
+            transition: background 1s ease;
+        }
+
+        /* LED Lights */
+        .led-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            padding: 0 20px;
+            pointer-events: none;
+            z-index: 100;
+            display: none;
+        }
+
+        body.celebration-theme .led-container {
+            display: flex;
+        }
+
+        .led-light {
+            width: 12px;
+            height: 25px;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            position: relative;
+            animation: flash 1.5s infinite;
+        }
+
+        .led-light::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: 2px;
+            width: 8px;
+            height: 6px;
+            background: #444;
+            border-radius: 2px;
+        }
+
+        @keyframes flash {
+            0%, 100% { opacity: 0.3; filter: brightness(0.5); }
+            50% { opacity: 1; filter: brightness(1.5) blur(1px); }
+        }
+
+        /* Snow & Gifts */
+        .snow-pile {
+            position: fixed;
+            bottom: -10px;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background: linear-gradient(to bottom, #fff 0%, #e2e8f0 100%);
+            border-radius: 100% 100% 0 0 / 100% 100% 0 0;
+            z-index: 5;
+            box-shadow: 0 -5px 15px rgba(255,255,255,0.5);
+            display: none;
+        }
+
+        body.celebration-theme .snow-pile {
+            display: block;
+        }
+
+        .gifts-container {
+            position: fixed;
+            bottom: 20px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 50px;
+            pointer-events: none;
+            z-index: 6;
+            display: none;
+        }
+
+        body.celebration-theme .gifts-container {
+            display: flex;
+        }
+
+        .glowing-2026 {
+            font-size: 4rem;
+            font-weight: 900;
+            background: linear-gradient(to right, #60a5fa, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 15px rgba(96, 165, 250, 0.8));
+            animation: glow 2s infinite alternate;
+            display: none;
+        }
+
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 10px rgba(96, 165, 250, 0.5)); }
+            to { filter: drop-shadow(0 0 30px rgba(192, 132, 252, 1)); transform: scale(1.05); }
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(15, 23, 42, 0.1);
+            border-radius: 24px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+        }
+
+        .game-icon {
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .game-icon:hover {
+            transform: scale(1.1) rotate(3deg);
+            border-color: var(--primary);
+        }
+
+        @keyframes bounce-slow {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .animate-bounce-slow {
+            animation: bounce-slow 3s infinite ease-in-out;
+        }
+
+        #canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 50;
+            width: 100%;
+            height: 100%;
+        }
+
+        .modal-enter {
+            animation: modalIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8) translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        #game-area {
+            width: 100%;
+            height: 400px;
+            position: relative;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: 16px;
+        }
+
+        .game-target {
+            position: absolute;
+            cursor: pointer;
+            user-select: none;
+            font-size: 2.5rem;
+            transition: transform 0.1s;
+        }
+
+        .game-target:active {
+            transform: scale(0.8);
+        }
+
+        #games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 640px) {
+            #games-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body class="p-4 md:p-8">
+    <div class="led-container" id="leds"></div>
+    <div class="mesh-gradient"></div>
+    <canvas id="canvas"></canvas>
+
+    <main class="max-w-6xl mx-auto space-y-12 relative z-10">
+        <!-- Header -->
+        <div id="countdown-header" class="text-center space-y-4">
+            <div
+                class="inline-flex items-center gap-2 px-4 py-1.5 glass rounded-full text-[10px] font-bold tracking-widest uppercase text-blue-600">
+                <span>🚀</span> 2026 Adventure
+            </div>
+            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight text-slate-900 leading-tight">
+                New Year <span
+                    class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500">Magic</span>
+            </h1>
+
+            <div id="timer-container" class="flex justify-center gap-4 md:gap-8 mt-8">
+                <div class="text-center">
+                    <div id="days" class="text-4xl md:text-6xl font-black text-slate-900">00</div>
+                    <div class="text-[10px] uppercase font-bold text-slate-400">Days</div>
+                </div>
+                <div class="text-center">
+                    <div id="hours" class="text-4xl md:text-6xl font-black text-slate-900">00</div>
+                    <div class="text-[10px] uppercase font-bold text-slate-400">Hours</div>
+                </div>
+                <div class="text-center">
+                    <div id="minutes" class="text-4xl md:text-6xl font-black text-slate-900">00</div>
+                    <div class="text-[10px] uppercase font-bold text-slate-400">Mins</div>
+                </div>
+                <div class="text-center">
+                    <div id="seconds" class="text-4xl md:text-6xl font-black text-blue-600">00</div>
+                    <div class="text-[10px] uppercase font-bold text-slate-400">Secs</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Celebration Title (Hidden by default) -->
+        <div id="celebration-header" class="hidden text-center space-y-4 py-10">
+            <h1 class="text-6xl md:text-8xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-blue-400 via-white to-cyan-400 animate-pulse">
+                HAPPY 2026!
+            </h1>
+            <p class="text-xl font-bold text-blue-300 tracking-widest uppercase">The Year of New Adventures Begins</p>
+        </div>
+
+        <!-- Games Arcade -->
+        <div class="glass p-8 space-y-8">
+            <div class="flex items-center justify-between">
+                <h2 class="text-2xl font-black text-slate-900 flex items-center gap-3">
+                    <span class="p-2 bg-blue-100 rounded-xl text-blue-600">🎮</span>
+                    Game Station
+                </h2>
+                <div class="text-sm font-bold text-blue-600 bg-blue-50 px-6 py-2 rounded-full shadow-sm">
+                    Total Energy: <span id="score">0</span>
+                </div>
+            </div>
+
+            <div id="games-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                <!-- Icons injected here -->
+            </div>
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="flex flex-wrap items-center justify-center gap-4">
+            <button onclick="igniteSpread()"
+                class="px-10 py-5 bg-slate-900 text-white font-black rounded-2xl hover:scale-105 transition-all active:scale-95 flex items-center gap-3 group shadow-xl">
+                <span class="group-hover:rotate-45 transition-transform text-2xl">🎆</span> FIREWORKS
+            </button>
+            <button onclick="showJoke()"
+                class="px-10 py-5 glass text-slate-900 font-black rounded-2xl hover:bg-white/50 transition-all active:scale-95 flex items-center gap-3 shadow-md">
+                <span class="text-2xl">🤣</span> JOKES
+            </button>
+        </div>
+    </main>
+
+    <!-- Unified Game Modal -->
+    <div id="game-modal"
+        class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md hidden">
+        <div
+            class="glass w-full max-w-4xl p-6 md:p-10 relative modal-enter max-h-[96vh] flex flex-col overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.3)] border-white/20">
+            <button onclick="closeModal()"
+                class="absolute top-4 right-4 z-[110] w-12 h-12 flex items-center justify-center bg-white/10 hover:bg-red-500/20 hover:text-red-500 backdrop-blur-md rounded-full transition-all font-black text-2xl border border-white/20 shadow-xl group">
+                <span class="group-hover:rotate-90 transition-transform">✕</span>
+            </button>
+            <div id="modal-content"
+                class="flex-1 overflow-y-auto scrollbar-hide flex flex-col items-center justify-center"></div>
+        </div>
+    </div>
+
+    <!-- Companion -->
+    <div class="fixed bottom-8 right-8 animate-float cursor-pointer" onclick="igniteSpread()">
+        <div class="glass p-4 flex items-center gap-3">
+            <div
+                class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-3xl shadow-xl">
+                🐧</div>
+            <div class="text-left hidden lg:block">
+                <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">By</div>
+                <div class="text-base font-black text-slate-900">Muhammad Haseeb</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="fixed top-8 right-8 z-[200] space-y-4 pointer-events-none"></div>
+
+    <div class="snow-pile"></div>
+    <div class="gifts-container" id="gifts">
+        <div class="text-5xl">🎁</div>
+        <div id="glowing-year" class="glowing-2026">2026</div>
+        <div class="text-5xl">🎁</div>
+    </div>
+
+    <script>
+        // Initialize LED lights
+        function initLEDs() {
+            const container = document.getElementById('leds');
+            const colors = ['#f87171', '#fbbf24', '#34d399', '#60a5fa', '#f472b6'];
+            for (let i = 0; i < 40; i++) {
+                const led = document.createElement('div');
+                led.className = 'led-light';
+                led.style.backgroundColor = colors[i % colors.length];
+                led.style.animationDelay = (Math.random() * 2) + 's';
+                container.appendChild(led);
+            }
+        }
+        initLEDs();
+
+        class NotificationManager {
+            static show(message, type = 'info') {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                const colors = {
+                    info: 'from-blue-500 to-cyan-500',
+                    success: 'from-green-500 to-emerald-500',
+                    error: 'from-red-500 to-rose-500',
+                    warning: 'from-amber-500 to-orange-500'
+                };
+                toast.className = `glass p-4 rounded-2xl shadow-2xl flex items-center gap-3 min-w-[300px] transform translate-x-full transition-all duration-500 opacity-0 pointer-events-auto`;
+                toast.innerHTML = `
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br ${colors[type]} flex items-center justify-center text-white shadow-lg">
+                        ${type === 'success' ? '✨' : type === 'error' ? '🚫' : '💡'}
+                    </div>
+                    <div class="flex-1 text-sm font-bold text-slate-800">${message}</div>
+                `;
+                container.appendChild(toast);
+                setTimeout(() => { toast.classList.remove('translate-x-full', 'opacity-0'); }, 10);
+                setTimeout(() => {
+                    toast.classList.add('translate-x-full', 'opacity-0');
+                    setTimeout(() => toast.remove(), 500);
+                }, 4000);
+            }
+        }
+
+        class SoundManager {
+            constructor() {
+                this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            play(freq, type = 'sine', duration = 0.1) {
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + duration);
+            }
+            playSuccess() { this.play(880, 'sine', 0.2); this.play(1100, 'sine', 0.2); }
+            playError() { this.play(220, 'square', 0.3); }
+            playPop() { this.play(600 + Math.random() * 400, 'sine', 0.05); }
+            playClick() { this.play(400, 'sine', 0.05); }
+            playNote(note) {
+                const freqs = { 'C': 261.63, 'D': 293.66, 'E': 329.63, 'F': 349.23, 'G': 392.00, 'A': 440.00, 'B': 493.88 };
+                if (freqs[note]) this.play(freqs[note], 'triangle', 0.5);
+            }
+        }
+
+        const sounds = new SoundManager();
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let score = 0;
+
+        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // --- Countdown ---
+        const target = new Date('December 26, 2025 02:15:00').getTime();
+        let celebrationTriggered = false;
+
+        function startCelebration() {
+            if (celebrationTriggered) return;
+            celebrationTriggered = true;
+            
+            // Remove countdown elements
+            document.getElementById('countdown-header').classList.add('hidden');
+            document.getElementById('celebration-header').classList.remove('hidden');
+            
+            // Apply new theme
+            document.body.classList.add('celebration-theme');
+            document.getElementById('glowing-year').style.display = 'block';
+
+            // Double interactivity: Enhanced Particles
+            setInterval(() => {
+                if (Math.random() > 0.7) {
+                    const x = Math.random() * window.innerWidth;
+                    particles.push(new Particle(x, window.innerHeight, `hsl(${Math.random() * 360}, 70%, 70%)`));
+                }
+            }, 50);
+
+            // Re-render games to show all
+            renderGames();
+            
+            // Massive firework show
+            const celebrationInterval = setInterval(() => {
+                const x = Math.random() * window.innerWidth;
+                const y = Math.random() * window.innerHeight;
+                ignite(x, y);
+                score += 10;
+                updateScore();
+            }, 100);
+
+            setTimeout(() => clearInterval(celebrationInterval), 10000);
+            
+            NotificationManager.show('WELCOME TO 2026! 🎆', 'success');
+            NotificationManager.show('NEW GAMES UNLOCKED! 🎮', 'info');
+            sounds.playSuccess();
+        }
+
+        const countdownInterval = setInterval(() => {
+            const diff = target - new Date().getTime();
+            if (diff <= 0) {
+                clearInterval(countdownInterval);
+                document.getElementById('days').innerText = '00';
+                document.getElementById('hours').innerText = '00';
+                document.getElementById('minutes').innerText = '00';
+                document.getElementById('seconds').innerText = '00';
+                startCelebration();
+                return;
+            }
+            document.getElementById('days').innerText = String(Math.floor(diff / 86400000)).padStart(2, '0');
+            document.getElementById('hours').innerText = String(Math.floor((diff % 86400000) / 3600000)).padStart(2, '0');
+            document.getElementById('minutes').innerText = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
+            document.getElementById('seconds').innerText = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+        }, 1000);
+
+        // --- Particles ---
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x; this.y = y; this.color = color;
+                this.size = Math.random() * 5 + 1;
+                this.velocity = { x: (Math.random() - 0.5) * 15, y: (Math.random() - 0.5) * 15 };
+                this.alpha = 1; this.friction = 0.95; this.gravity = 0.2;
+            }
+            update() {
+                this.velocity.x *= this.friction; this.velocity.y *= this.friction;
+                this.velocity.y += this.gravity; this.x += this.velocity.x; this.y += this.velocity.y;
+                this.alpha -= 0.01;
+            }
+            draw() {
+                ctx.save(); ctx.globalAlpha = this.alpha; ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color; ctx.fill(); ctx.restore();
+            }
+        }
+
+        function ignite(x, y) {
+            const colors = ['#2563eb', '#06b6d4', '#d946ef', '#fbbf24', '#22c55e'];
+            sounds.playPop();
+            for (let i = 0; i < 30; i++) particles.push(new Particle(x, y, colors[Math.floor(Math.random() * colors.length)]));
+        }
+
+        function igniteSpread() {
+            for (let i = 0; i < 8; i++) {
+                setTimeout(() => {
+                    const x = Math.random() * window.innerWidth;
+                    const y = Math.random() * window.innerHeight;
+                    ignite(x, y); score += 5; updateScore();
+                }, i * 150);
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles = particles.filter(p => p.alpha > 0);
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        function updateScore() { document.getElementById('score').innerText = score; }
+
+        // --- Games Definition ---
+        const games = [
+            { id: 'pop', icon: '🎈', name: 'Balloon Pop' },
+            { id: 'math', icon: '➕', name: 'Magic Math' },
+            { id: 'match', icon: '🧩', name: 'Emoji Match' },
+            { id: 'click', icon: '⚡', name: 'Energy Charge' },
+            { id: 'paint', icon: '🎨', name: 'Neon Painter' },
+            { id: 'catch', icon: '❄️', name: 'Snow Catch' },
+            { id: 'star', icon: '⭐', name: 'Star Catcher' },
+            { id: 'rps', icon: '✊', name: 'R-P-S' },
+            { id: 'simon', icon: '🔴', name: 'Simon Says' },
+            { id: 'reaction', icon: '⏱️', name: 'Fast Tap' },
+            { id: 'shake', icon: '📱', name: 'Energy Shake' },
+            { id: 'gift', icon: '🎁', name: 'Box Surprise' },
+            { id: 'rocket', icon: '🚀', name: 'Rocket Tap' },
+            { id: 'bubble', icon: '🫧', name: 'Bubble Burst' },
+            { id: 'music', icon: '🎹', name: 'Magic Piano' },
+            { id: 'ttt', icon: '❌', name: 'Tic-Tac-Toe' },
+            { id: 'mole', icon: '🔨', name: 'Whack-a-Mole' },
+            { id: 'snake', icon: '🐍', name: 'Snake' },
+            { id: 'pong', icon: '🏓', name: 'Ping Pong' },
+            { id: 'break', icon: '🧱', name: 'Breakout' },
+            { id: 'hang', icon: '🪢', name: 'Hangman' },
+            { id: 'quiz', icon: '❓', name: 'Quiz Mega' },
+            { id: 'slide', icon: '🔢', name: 'Slide Puzzle' },
+            { id: 'c4', icon: '🟡', name: 'Connect 4' },
+            { id: 'mine', icon: '💣', name: 'Minesweeper' },
+            { id: 'flap', icon: '🐦', name: 'Flappy Clone' },
+            { id: 'space', icon: '👾', name: 'Space War' },
+            { id: 'tetris', icon: '🏗️', name: 'Tetris' },
+            { id: 'neon', icon: '🏮', name: 'Neon Dash' },
+            { id: 'echo', icon: '📡', name: 'Echo Memory' },
+            { id: 'gravity', icon: '🌌', name: 'Gravity Flip' },
+            { id: 'rhythm', icon: '🥁', name: 'Beat Master' },
+            { id: 'wordle', icon: '📝', name: 'Word Guess' },
+            { id: 'color', icon: '🌈', name: 'Color Sort' },
+            { id: 'jump', icon: '🦘', name: 'Dino Jump' },
+            { id: 'stack', icon: '📦', name: 'Stacker' },
+            { id: 'bird', icon: '🦉', name: 'Owl Glide' },
+            { id: 'maze', icon: '🌀', name: 'Maze Run' },
+            { id: 'slice', icon: '⚔️', name: 'Fruit Ninja' },
+            { id: 'draw', icon: '🖌️', name: 'Quick Draw' },
+            { id: 'pipe', icon: '🚿', name: 'Pipe Connect' },
+            { id: 'shoot', icon: '🎯', name: 'Bullseye' },
+            { id: 'block', icon: '🧊', name: 'Block Blast' },
+            { id: 'spin', icon: '🎡', name: 'Lucky Spin' },
+            { id: 'dig', icon: '⛏️', name: 'Mine Digger' },
+            { id: 'surf', icon: '🏄', name: 'Cyber Surf' },
+            { id: 'golf', icon: '⛳', name: 'Mini Golf' },
+            { id: 'chef', icon: '🍳', name: 'Pizza Chef' },
+            { id: 'zoo', icon: '🐼', name: 'Zoo Match' },
+            { id: 'tank', icon: '🚜', name: 'Tank War' },
+            { id: 'fly', icon: '🚁', name: 'Copter' },
+            { id: 'box', icon: '🥊', name: 'Boxer' },
+            { id: 'math2', icon: '🔢', name: 'Math Rush' },
+            { id: 'swim', icon: '🐟', name: 'Sea Quest' },
+            { id: 'hero', icon: '🦸', name: 'Hero Tap' },
+            { id: 'fire', icon: '🔥', name: 'Fire Control' }
+        ];
+
+        function renderGames() {
+            const grid = document.getElementById('games-grid');
+            grid.innerHTML = '';
+            
+            // Show only first 28 games before timer, all 56+ after
+            const visibleGames = celebrationTriggered ? games : games.slice(0, 28);
+            
+            visibleGames.forEach(g => {
+                const div = document.createElement('div');
+                div.className = 'game-icon glass p-5 flex flex-col items-center gap-3 text-center';
+                div.onclick = () => launchGame(g.id);
+                div.innerHTML = `<span class="text-4xl">${g.icon}</span><span class="text-[10px] font-black uppercase tracking-widest text-slate-500">${g.name}</span>`;
+                grid.appendChild(div);
+            });
+        }
+        renderGames();
+
+        // --- Game Engine ---
+        let gameTimer = null;
+        function launchGame(id) {
+            const modal = document.getElementById('game-modal');
+            const content = document.getElementById('modal-content');
+            modal.classList.remove('hidden');
+            content.innerHTML = '';
+            if (gameTimer) clearInterval(gameTimer);
+
+            const game = games.find(g => g.id === id);
+            
+            // Post-timer specific check (logic placeholder)
+            if (!celebrationTriggered && games.indexOf(game) >= 28) {
+                content.innerHTML = `<div class="text-center p-10"><h2 class="text-3xl font-black mb-4">LOCKED 🔒</h2><p class="text-slate-400 font-bold">This game unlocks in 2026!</p></div>`;
+                return;
+            }
+
+            switch (id) {
+                case 'pop': setupBalloonPop(content); break;
+                case 'math': setupMagicMath(content); break;
+                case 'match': setupMemoryMatch(content); break;
+                case 'click': setupEnergyClicker(content); break;
+                case 'paint': setupPainter(content); break;
+                case 'catch': setupFallingGame(content, '❄️', 'Snow Catch', 'slow'); break;
+                case 'star': setupFallingGame(content, '⭐', 'Star Catcher', 'fast'); break;
+                case 'rps': setupRPS(content); break;
+                case 'simon': setupSimon(content); break;
+                case 'reaction': setupReaction(content); break;
+                case 'shake': setupShake(content); break;
+                case 'gift': setupGift(content); break;
+                case 'rocket': setupRocket(content); break;
+                case 'bubble': setupBubble(content); break;
+                case 'music': setupPiano(content); break;
+                case 'ttt': setupTicTacToe(content); break;
+                case 'mole': setupWhackAMole(content); break;
+                case 'snake': setupSnake(content); break;
+                case 'pong': setupPong(content); break;
+                case 'break': setupBreakout(content); break;
+                case 'hang': setupHangman(content); break;
+                case 'quiz': setupQuiz(content); break;
+                case 'slide': setupSlidePuzzle(content); break;
+                case 'c4': setupConnectFour(content); break;
+                case 'mine': setupMinesweeper(content); break;
+                case 'flap': setupFlappyBird(content); break;
+                case 'space': setupSpaceInvaders(content); break;
+                case 'tetris': setupTetris(content); break;
+                case 'neon': setupNeonDash(content); break;
+                case 'echo': setupEchoMemory(content); break;
+                case 'gravity': setupGravityFlip(content); break;
+                case 'rhythm': setupBeatMaster(content); break;
+                case 'wordle': setupWordGuess(content); break;
+                case 'color': setupColorSort(content); break;
+                case 'jump': setupDinoJump(content); break;
+                case 'stack': setupStacker(content); break;
+                case 'bird': setupOwlGlide(content); break;
+                case 'maze': setupMazeRun(content); break;
+                case 'slice': setupFruitNinja(content); break;
+                case 'draw': setupQuickDraw(content); break;
+                case 'pipe': setupPipeConnect(content); break;
+                case 'shoot': setupBullseye(content); break;
+                case 'block': setupBlockBlast(content); break;
+                case 'spin': setupLuckySpin(content); break;
+                case 'dig': setupMineDigger(content); break;
+                case 'surf': setupCyberSurf(content); break;
+                case 'golf': setupMiniGolf(content); break;
+                case 'chef': setupPizzaChef(content); break;
+                case 'zoo': setupZooMatch(content); break;
+                case 'tank': setupTankWar(content); break;
+                case 'fly': setupCopter(content); break;
+                case 'box': setupBoxer(content); break;
+                case 'math2': setupMathRush(content); break;
+                case 'swim': setupSeaQuest(content); break;
+                case 'hero': setupHeroTap(content); break;
+                case 'fire': setupFireControl(content); break;
+            }
+        }
+
+        function setupNeonDash(parent) {
+            parent.innerHTML = `<h3 class="text-2xl font-black mb-4">Neon Dash 🏮</h3><div id="game-area" class="bg-slate-900 border-4 border-blue-500 rounded-3xl overflow-hidden relative"><div id="neon-player" class="absolute w-8 h-8 bg-blue-400 shadow-[0_0_15px_#60a5fa] rounded-lg" style="bottom: 20px; left: 50px;"></div></div>`;
+            const area = document.getElementById('game-area');
+            const player = document.getElementById('neon-player');
+            let isJumping = false;
+            area.onclick = () => { if(!isJumping) { isJumping = true; player.animate([{bottom: '20px'}, {bottom: '120px'}, {bottom: '20px'}], {duration: 600, easing: 'ease-out'}).onfinish = () => isJumping = false; } };
+            gameTimer = setInterval(() => {
+                const obs = document.createElement('div');
+                obs.className = 'absolute bottom-[20px] w-6 h-10 bg-red-500 shadow-[0_0_10px_#ef4444]';
+                obs.style.right = '-20px';
+                area.appendChild(obs);
+                obs.animate([{right: '-20px'}, {right: '100%'}], {duration: 2000}).onfinish = () => {
+                    score += 5; updateScore(); obs.remove();
+                };
+            }, 1500);
+        }
+
+        function setupEchoMemory(parent) {
+            const sequence = [];
+            let userIndex = 0;
+            const colors = ['bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500'];
+            parent.innerHTML = `<h3 class="text-2xl font-black mb-4">Echo Memory 📡</h3><div class="grid grid-cols-2 gap-4 w-64 h-64" id="echo-grid"></div>`;
+            const grid = document.getElementById('echo-grid');
+            colors.forEach((c, i) => {
+                const b = document.createElement('div');
+                b.className = `${c} rounded-2xl cursor-pointer opacity-50 hover:opacity-100 transition-opacity`;
+                b.onclick = () => checkEcho(i);
+                grid.appendChild(b);
+            });
+            function nextRound() {
+                sequence.push(Math.floor(Math.random() * 4));
+                userIndex = 0;
+                let i = 0;
+                const interval = setInterval(() => {
+                    const b = grid.children[sequence[i]];
+                    b.classList.remove('opacity-50');
+                    setTimeout(() => b.classList.add('opacity-50'), 300);
+                    i++;
+                    if(i >= sequence.length) clearInterval(interval);
+                }, 600);
+            }
+            window.checkEcho = (i) => {
+                if(i === sequence[userIndex]) {
+                    userIndex++;
+                    if(userIndex === sequence.length) { score += 20; updateScore(); NotificationManager.show('Matched!', 'success'); nextRound(); }
+                } else { NotificationManager.show('Try Again!', 'error'); sequence.length = 0; nextRound(); }
+            };
+            nextRound();
+        }
+
+        function setupGravityFlip(parent) {
+            parent.innerHTML = `<h3 class="text-2xl font-black mb-4">Gravity Flip 🌌</h3><div id="game-area" class="bg-indigo-900 rounded-3xl relative overflow-hidden h-64"><div id="grav-ball" class="absolute w-8 h-8 bg-purple-400 rounded-full shadow-[0_0_20px_purple]" style="top: 0; left: 50%;"></div></div>`;
+            const area = document.getElementById('game-area');
+            const ball = document.getElementById('grav-ball');
+            let isDown = false;
+            area.onclick = () => {
+                isDown = !isDown;
+                ball.style.top = isDown ? 'calc(100% - 32px)' : '0';
+                ball.style.transition = 'top 0.3s ease-in-out';
+                score += 2; updateScore();
+            };
+        }
+
+        function setupBeatMaster(parent) {
+            parent.innerHTML = `<h3 class="text-2xl font-black mb-4">Beat Master 🥁</h3><div class="flex gap-4" id="beat-pads"></div>`;
+            const pads = ['🥁', '🎹', '🎸', '🎺'];
+            pads.forEach(p => {
+                const b = document.createElement('button');
+                b.className = 'glass w-20 h-20 text-4xl hover:scale-110 active:scale-90 transition-all';
+                b.innerText = p;
+                b.onclick = () => { sounds.play(200 + Math.random() * 800); score += 1; updateScore(); };
+                document.getElementById('beat-pads').appendChild(b);
+            });
+        }
+
+        function setupWordGuess(parent) {
+            const words = ['NEW', 'YEAR', 'MAGIC', 'PARTY', 'FUN'];
+            const word = words[Math.floor(Math.random() * words.length)];
+            parent.innerHTML = `<div class="text-center space-y-4"><h3 class="text-2xl font-black">Word Guess 📝</h3><div class="text-4xl tracking-widest font-black">${word.split('').map(() => '_').join(' ')}</div><div class="flex gap-2 flex-wrap justify-center" id="keys"></div></div>`;
+            'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(l => {
+                const b = document.createElement('button');
+                b.className = 'glass p-2 w-10 h-10 font-bold';
+                b.innerText = l;
+                b.onclick = () => {
+                    if(word.includes(l)) { NotificationManager.show('Correct!', 'success'); score += 5; updateScore(); }
+                    else { b.style.opacity = '0.3'; }
+                };
+                document.getElementById('keys').appendChild(b);
+            });
+        }
+
+        function setupGenericGame(parent, name, icon) {
+            parent.innerHTML = `
+                <div class="text-center space-y-6">
+                    <div class="text-8xl animate-bounce-slow">${icon}</div>
+                    <h2 class="text-4xl font-black">${name}</h2>
+                    <p class="text-xl font-bold text-slate-400 italic">Click to generate energy!</p>
+                    <button onclick="score+=5; updateScore(); ignite(event.clientX, event.clientY);" class="px-10 py-5 bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-black rounded-2xl hover:scale-110 transition-all active:scale-95 shadow-xl">PLAY & COLLECT ⚡</button>
+                </div>
+            `;
+        }
+        
+        // Map remaining games to generic but interactive template
+        function setupColorSort(p) { setupGenericGame(p, 'Color Sort', '🌈'); }
+        function setupDinoJump(p) { setupGenericGame(p, 'Dino Jump', '🦘'); }
+        function setupStacker(p) { setupGenericGame(p, 'Stacker', '📦'); }
+        function setupOwlGlide(p) { setupGenericGame(p, 'Owl Glide', '🦉'); }
+        function setupMazeRun(p) { setupGenericGame(p, 'Maze Run', '🌀'); }
+        function setupFruitNinja(p) { setupGenericGame(p, 'Fruit Ninja', '⚔️'); }
+        function setupQuickDraw(p) { setupGenericGame(p, 'Quick Draw', '🖌️'); }
+        function setupPipeConnect(p) { setupGenericGame(p, 'Pipe Connect', '🚿'); }
+        function setupBullseye(p) { setupGenericGame(p, 'Bullseye', '🎯'); }
+        function setupBlockBlast(p) { setupGenericGame(p, 'Block Blast', '🧊'); }
+        function setupLuckySpin(p) { setupGenericGame(p, 'Lucky Spin', '🎡'); }
+        function setupMineDigger(p) { setupGenericGame(p, 'Mine Digger', '⛏️'); }
+        function setupCyberSurf(p) { setupGenericGame(p, 'Cyber Surf', '🏄'); }
+        function setupMiniGolf(p) { setupGenericGame(p, 'Mini Golf', '⛳'); }
+        function setupPizzaChef(p) { setupGenericGame(p, 'Pizza Chef', '🍳'); }
+        function setupZooMatch(p) { setupGenericGame(p, 'Zoo Match', '🐼'); }
+        function setupTankWar(p) { setupGenericGame(p, 'Tank War', '🚜'); }
+        function setupCopter(p) { setupGenericGame(p, 'Copter', '🚁'); }
+        function setupBoxer(p) { setupGenericGame(p, 'Boxer', '🥊'); }
+        function setupMathRush(p) { setupGenericGame(p, 'Math Rush', '🔢'); }
+        function setupSeaQuest(p) { setupGenericGame(p, 'Sea Quest', '🐟'); }
+        function setupHeroTap(p) { setupGenericGame(p, 'Hero Tap', '🦸'); }
+        function setupFireControl(p) { setupGenericGame(p, 'Fire Control', '🔥'); }
+
+        function setupBalloonPop(parent) {
+            parent.innerHTML = `<h3 class="text-2xl font-black text-center mb-4">Balloon Pop! 🎈</h3><div id="game-area" class="h-96 relative bg-sky-50 rounded-3xl overflow-hidden shadow-inner cursor-crosshair"></div>`;
+            const area = document.getElementById('game-area');
+            gameTimer = setInterval(() => {
+                const b = document.createElement('div');
+                const isGold = Math.random() < 0.15;
+                b.className = 'game-target text-5xl absolute select-none filter drop-shadow-lg';
+                b.innerText = isGold ? '🌠' : ['🎈', '🔴', '🟡', '🟢', '🔵'][Math.floor(Math.random() * 5)];
+                b.style.left = Math.random() * 85 + '%';
+                b.style.top = '100%';
+                area.appendChild(b);
+
+                b.onclick = (e) => {
+                    score += isGold ? 50 : 5; updateScore();
+                    ignite(e.clientX, e.clientY);
+                    sounds.playPop();
+                    if (isGold) NotificationManager.show('JACKPOT! 🌠', 'success');
+                    b.remove();
+                };
+
+                const drift = (Math.random() - 0.5) * 20;
+                b.animate([
+                    { top: '100%', left: b.style.left },
+                    { top: '-20%', left: (parseFloat(b.style.left) + drift) + '%' }
+                ], { duration: (isGold ? 1500 : 3000) + Math.random() * 2000, easing: 'ease-out' }).onfinish = () => b.remove();
+            }, 800);
+        }
+
+        function setupMagicMath(parent) {
+            let timeLeft = 12;
+            const ops = ['+', '-', '*'];
+            const op = ops[Math.floor(Math.random() * ops.length)];
+            const a = Math.floor(Math.random() * 10) + 1, b = Math.floor(Math.random() * 10) + 1;
+            let ans = 0;
+            if (op === '+') ans = a + b;
+            else if (op === '-') ans = Math.max(a, b) - Math.min(a, b);
+            else ans = a * b;
+
+            const displayA = op === '-' ? Math.max(a, b) : a;
+            const displayB = op === '-' ? Math.min(a, b) : b;
+
+            parent.innerHTML = `
+                <div class="text-center space-y-6">
+                    <h3 class="text-2xl font-black text-slate-800 uppercase tracking-tight">Kids Math! 🌈</h3>
+                    <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+                        <div id="math-timer" class="h-full bg-gradient-to-r from-blue-400 to-indigo-500 transition-all duration-1000" style="width: 100%"></div>
+                    </div>
+                    <div class="text-7xl font-black text-slate-900 drop-shadow-sm">${displayA} ${op} ${displayB}</div>
+                    <div class="grid grid-cols-2 gap-4 w-full">
+                        ${[ans, ans + 2, ans - 1, ans + 5].filter(n => n >= 0).sort(() => Math.random() - 0.5).map(n =>
+                `<button onclick="checkMath(${n}, ${ans})" class="py-6 glass font-black text-4xl hover:bg-blue-600 hover:text-white transition-all transform hover:scale-105 active:scale-95 rounded-3xl border-b-8 border-slate-200">${n}</button>`
+            ).join('')}
+                    </div>
+                </div>`;
+
+            const timerInt = setInterval(() => {
+                timeLeft--;
+                const bar = document.getElementById('math-timer');
+                if (bar) bar.style.width = (timeLeft * 10) + '%';
+                if (timeLeft <= 0) {
+                    clearInterval(timerInt);
+                    sounds.playError();
+                    NotificationManager.show('Time is up! ⏰', 'error');
+                    launchGame('math');
+                }
+            }, 1000);
+
+            // Store interval for cleanup
+            const oldClose = closeModal;
+            window.closeModal = () => { clearInterval(timerInt); window.closeModal = oldClose; oldClose(); };
+            window.checkMath = (n, ans) => {
+                clearInterval(timerInt);
+                if (n === ans) {
+                    score += 20; updateScore();
+                    sounds.playSuccess();
+                    NotificationManager.show('Smart! 🧠', 'success');
+                    launchGame('math');
+                } else {
+                    sounds.playError();
+                    NotificationManager.show('Try again! ❤️', 'error');
+                }
+            };
+        }
+
+        function setupMemoryMatch(parent) {
+            const emojis = ['🚀', '🎉', '🌈', '🎁', '🚀', '🎉', '🌈', '🎁'];
+            let flipped = [];
+            parent.innerHTML = `<h3 class="text-2xl font-black">Memory 🧩</h3><div class="grid grid-cols-4 gap-4 w-full" id="mem-grid"></div>`;
+            const grid = document.getElementById('mem-grid');
+            emojis.sort(() => Math.random() - 0.5).forEach((e, i) => {
+                const card = document.createElement('div');
+                card.className = 'memory-card h-16 glass flex items-center justify-center text-2xl font-bold cursor-pointer';
+                card.onclick = () => {
+                    if (flipped.length >= 2 || card.innerText) return;
+                    card.innerText = e; flipped.push(card);
+                    if (flipped.length === 2) {
+                        if (flipped[0].innerText === flipped[1].innerText) {
+                            score += 25; updateScore();
+                            sounds.playSuccess();
+                            NotificationManager.show('Match found! ✨', 'success');
+                            flipped = [];
+                        }
+                        else {
+                            sounds.playClick();
+                            setTimeout(() => { flipped.forEach(c => c.innerText = ''); flipped = []; }, 500);
+                        }
+                    }
+                };
+                grid.appendChild(card);
+            });
+        }
+
+        function setupPainter(parent) {
+            parent.innerHTML = `
+                <h3 class="text-2xl font-black text-center mb-2">Neon Draw 🎨</h3>
+                <div class="flex gap-2 mb-4 justify-center flex-wrap max-w-sm mx-auto p-2 glass rounded-2xl">
+                    ${['#2563eb', '#06b6d4', '#d946ef', '#fbbf24', '#22c55e', '#ef4444', '#ffffff'].map(c =>
+                `<div onclick="setBrushColor('${c}')" class="w-8 h-8 rounded-full cursor-pointer border-2 border-white shadow-sm ring-1 ring-slate-100" style="background: ${c}"></div>`
+            ).join('')}
+                    <div class="flex items-center gap-2 ml-2">
+                        <span class="text-xs font-bold text-slate-400">SIZE</span>
+                        <input type="range" min="1" max="25" value="8" onchange="setBrushSize(this.value)" class="w-20 accent-blue-600">
+                    </div>
+                </div>
+                <div class="relative bg-slate-900 rounded-2xl overflow-hidden shadow-2xl mb-4 border-4 border-slate-800">
+                    <canvas id="sketch" class="w-full h-[320px] cursor-crosshair"></canvas>
+                </div>
+                <div class="flex gap-4">
+                    <button onclick="clearSketch()" class="px-6 py-4 glass font-black rounded-xl hover:bg-slate-50 transition-all">CLEAR</button>
+                    <button onclick="score+=50;updateScore();igniteSpread();NotificationManager.show('Beautiful Masterpiece! 🌈', 'success');closeModal()" class="flex-1 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-black rounded-xl shadow-lg transform active:scale-95 transition-all">DONE!</button>
+                </div>`;
+
+            const canvas = document.getElementById('sketch');
+            const ctx = canvas.getContext('2d');
+
+            // Set canvas resolution to match its display size exactly
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+
+            let drawing = false;
+            let brushColor = '#2563eb';
+            let brushSize = 5;
+
+            window.setBrushColor = (c) => brushColor = c;
+            window.setBrushSize = (s) => brushSize = s;
+            window.clearSketch = () => ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            const getCoords = (e) => {
+                const rect = canvas.getBoundingClientRect();
+                // Use clientX/Y to handle both mouse and touch, but subtract the canvas rect top/left
+                const x = ((e.clientX || e.touches[0].clientX) - rect.left) * (canvas.width / rect.width);
+                const y = ((e.clientY || e.touches[0].clientY) - rect.top) * (canvas.height / rect.height);
+                return { x, y };
+            };
+
+            const startDraw = (e) => {
+                drawing = true;
+                ctx.beginPath();
+                const { x, y } = getCoords(e);
+                ctx.moveTo(x, y);
+                draw(e);
+            };
+            const stopDraw = () => { drawing = false; ctx.beginPath(); };
+            const draw = (e) => {
+                if (!drawing) return;
+                const { x, y } = getCoords(e);
+
+                ctx.lineWidth = brushSize;
+                ctx.strokeStyle = brushColor;
+                ctx.shadowBlur = brushSize / 2;
+                ctx.shadowColor = brushColor;
+
+                ctx.lineTo(x, y);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+            };
+
+            canvas.addEventListener('mousedown', startDraw);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDraw);
+            canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDraw(e); }, { passive: false });
+            canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); }, { passive: false });
+            canvas.addEventListener('touchend', stopDraw);
+        }
+
+        function setupFallingGame(parent, icon, title, speed) {
+            parent.innerHTML = `<h3 class="text-2xl font-black text-center mb-4">${title} ${icon}</h3><div id="game-area" class="h-[400px] relative bg-slate-900/5 rounded-3xl overflow-hidden shadow-inner cursor-pointer"></div>`;
+            const area = document.getElementById('game-area');
+            const duration = speed === 'slow' ? 4000 : 2500;
+            const interval = speed === 'slow' ? 1000 : 700;
+
+            gameTimer = setInterval(() => {
+                const isBad = Math.random() < 0.2;
+                const s = document.createElement('div');
+                s.className = 'game-target text-5xl cursor-pointer select-none absolute filter drop-shadow-md';
+                s.innerText = isBad ? '💣' : icon;
+                const startX = Math.random() * 85;
+                s.style.left = startX + '%';
+                s.style.top = '-60px';
+                area.appendChild(s);
+
+                const wind = speed === 'slow' ? (Math.random() - 0.5) * 60 : (Math.random() - 0.5) * 30;
+                s.animate([
+                    { top: '-60px', left: startX + '%' },
+                    { top: '110%', left: (startX + wind) + '%' }
+                ], { duration: duration, easing: 'linear' }).onfinish = () => s.remove();
+
+                s.onclick = (e) => {
+                    if (isBad) {
+                        score = Math.max(0, score - 50); updateScore();
+                        sounds.playError();
+                        NotificationManager.show('Ouch! 💣', 'error');
+                    } else {
+                        score += speed === 'slow' ? 10 : 20;
+                        updateScore();
+                        ignite(e.clientX, e.clientY);
+                        sounds.playPop();
+                    }
+                    s.remove();
+                };
+            }, interval);
+        }
+
+        function setupRPS(parent) {
+            const items = ['✊', '✋', '✌️'];
+            parent.innerHTML = `<h3 class="text-2xl font-black">Rock Paper Scissors</h3><div class="flex gap-4 justify-center">
+                ${items.map(i => `<button onclick="playRPS('${i}')" class="text-5xl glass p-6 hover:bg-blue-50">${i}</button>`).join('')}
+            </div><div id="rps-res" class="text-xl font-bold text-center mt-4"></div>`;
+        }
+        window.playRPS = (user) => {
+            const items = ['✊', '✋', '✌️'];
+            const comp = items[Math.floor(Math.random() * 3)];
+            let res = '';
+            if (user === comp) {
+                res = "Draw!";
+                sounds.playClick();
+                NotificationManager.show('It is a draw! 🤝', 'info');
+            }
+            else if ((user === '✊' && comp === '✌️') || (user === '✋' && comp === '✊') || (user === '✌️' && comp === '✋')) {
+                res = "You Win! 🎉";
+                score += 30; updateScore();
+                sounds.playSuccess();
+                NotificationManager.show('You won! 🏆', 'success');
+            }
+            else {
+                res = "Comp Won! 🤖";
+                sounds.playError();
+                NotificationManager.show('Computer won! 🤖', 'error');
+            }
+            document.getElementById('rps-res').innerText = `${user} vs ${comp} : ${res}`;
+        };
+
+        function setupBubble(parent) {
+            parent.innerHTML = `<h3 class="text-2xl font-black">Bubble Burst! 🫧</h3><div id="game-area"></div>`;
+            const area = document.getElementById('game-area');
+            gameTimer = setInterval(() => {
+                const b = document.createElement('div');
+                b.className = 'game-target opacity-50'; b.innerText = '🫧';
+                b.style.left = Math.random() * 90 + '%'; b.style.top = Math.random() * 80 + '%';
+                b.style.transform = 'scale(0)';
+                area.appendChild(b);
+                b.animate([{ transform: 'scale(0)' }, { transform: 'scale(1.5)' }], { duration: 1500 }).onfinish = () => b.remove();
+                b.onclick = (e) => {
+                    score += 5; updateScore();
+                    ignite(e.clientX, e.clientY);
+                    sounds.playPop();
+                    b.remove();
+                };
+            }, 500);
+        }
+
+        function setupEnergyClicker(parent) {
+            parent.innerHTML = `<h3 class="text-2xl font-black">Charge 2026! ⚡</h3><div onclick="score+=2;updateScore();ignite(event.clientX, event.clientY)" class="w-40 h-40 bg-blue-600 rounded-full flex items-center justify-center text-6xl cursor-pointer hover:scale-110 active:scale-95 transition-all text-white shadow-2xl">⚡</div><p class="text-slate-400 font-bold">SMASH IT!</p>`;
+        }
+
+        function setupGift(parent) {
+            parent.innerHTML = `<h3 class="text-2xl font-black text-center mb-4 text-slate-800">Mystery Boxes 📦</h3>
+                <p class="text-xs text-slate-400 text-center mb-8 uppercase font-black tracking-widest">Only one box has the prize!</p>
+                <div id="game-area" class="flex items-center justify-center gap-6 h-48">
+                    ${[0, 1, 2].map(i => `<div onclick="openGift(this)" class="gift-box text-8xl cursor-pointer hover:scale-110 active:scale-95 transition-all drop-shadow-xl hover:rotate-3">🎁</div>`).join('')}
+                </div>`;
+        }
+        window.openGift = (el) => {
+            if (document.querySelector('.gift-box.opened')) return;
+            el.classList.add('opened');
+            const winChance = Math.random() < 0.4;
+            if (winChance) {
+                const prizes = ['🏰', '🦄', '🌈', '🍦', '💎', '🎨'];
+                const p = prizes[Math.floor(Math.random() * prizes.length)];
+                el.innerText = p;
+                el.style.transform = 'scale(1.5) rotate(0deg)';
+                score += 200; updateScore();
+                sounds.playSuccess(); igniteSpread();
+                NotificationManager.show(`YOU FOUND A ${p}! 💎`, 'success');
+            } else {
+                const fails = ['💨', '💨', '💨'];
+                el.innerText = fails[0];
+                el.style.opacity = '0.5';
+                sounds.playError();
+                NotificationManager.show('Empty! Try again! 💨', 'info');
+                setTimeout(() => launchGame('gift'), 1500);
+            }
+        };
+
+        function setupPiano(parent) {
+            const notes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+            const keys = ['A', 'S', 'D', 'F', 'G', 'H', 'J'];
+            parent.innerHTML = `<h3 class="text-2xl font-black">Magic Piano 🎹</h3><p class="text-xs text-slate-400">Use keys: A S D F G H J</p><div class="flex h-40 gap-1 w-full" id="piano-keys">
+                ${notes.map((n, i) => `<div onclick="playNote(this)" data-note="${n}" class="flex-1 glass flex items-end justify-center pb-4 font-black hover:bg-blue-100 cursor-pointer active:h-36 transition-all border-b-4 border-slate-200">
+                    <div class="flex flex-col items-center">
+                        <span class="text-xs text-slate-300 font-bold">${keys[i]}</span>
+                        <span>${n}</span>
+                    </div>
+                </div>`).join('')}
+            </div>`;
+
+            const handleKey = (e) => {
+                const idx = keys.indexOf(e.key.toUpperCase());
+                if (idx !== -1) {
+                    const el = document.querySelectorAll('#piano-keys > div')[idx];
+                    if (el) playNote(el);
+                }
+            };
+            window.addEventListener('keydown', handleKey);
+            // Cleanup listener on modal close
+            const oldClose = closeModal;
+            window.closeModal = () => { window.removeEventListener('keydown', handleKey); window.closeModal = oldClose; oldClose(); };
+        }
+        window.playNote = (el) => {
+            const note = el.dataset.note;
+            sounds.playNote(note);
+            score += 5; updateScore();
+            const colors = { 'C': 'bg-red-200', 'D': 'bg-orange-200', 'E': 'bg-yellow-200', 'F': 'bg-green-200', 'G': 'bg-blue-200', 'A': 'bg-indigo-200', 'B': 'bg-purple-200' };
+            el.classList.add(colors[note] || 'bg-blue-200');
+            el.style.height = '140px';
+            setTimeout(() => {
+                el.classList.remove(colors[note] || 'bg-blue-200');
+                el.style.height = '';
+            }, 300);
+        };
+
+        function setupReaction(parent) {
+            parent.innerHTML = `<h3 class="text-2xl font-black text-center">Reaction! ⏱️</h3><div id="react-btn" onclick="hitReact()" class="w-full h-40 glass rounded-2xl flex items-center justify-center font-black text-3xl cursor-pointer">WAIT...</div>`;
+            setTimeout(() => {
+                const btn = document.getElementById('react-btn');
+                if (!btn) return;
+                btn.innerText = 'TAP NOW!'; btn.style.background = '#22c55e'; btn.style.color = 'white';
+                btn.dataset.time = Date.now();
+            }, 1000 + Math.random() * 2000);
+        }
+        window.hitReact = () => {
+            const btn = document.getElementById('react-btn');
+            if (btn.innerText === 'TAP NOW!') {
+                const ms = Date.now() - btn.dataset.time;
+                score += Math.max(0, 500 - ms); updateScore();
+                sounds.playSuccess();
+                NotificationManager.show(`Reaction: ${ms}ms! ⚡`, 'success');
+                launchGame('reaction');
+            } else {
+                sounds.playError();
+                NotificationManager.show('Too early! 🐢', 'error');
+            }
+        };
+
+        function setupRocket(parent) {
+            parent.innerHTML = `<h3 class="text-2xl font-black">Rocket Fuel 🚀</h3><div class="w-full h-64 relative glass overflow-hidden"><div id="rocket-u" class="absolute bottom-4 left-1/2 -translate-x-1/2 text-5xl transition-all">🚀</div></div><button onclick="fuelRocket()" class="w-full py-4 bg-orange-500 text-white font-black rounded-xl shadow-lg mt-4">TAP TO FUEL!</button>`;
+        }
+        let fuel = 0;
+        window.fuelRocket = () => {
+            fuel += 10; score += 2; updateScore();
+            sounds.playClick();
+            const r = document.getElementById('rocket-u');
+            r.style.bottom = fuel + 'px';
+            if (fuel > 200) {
+                igniteSpread();
+                sounds.playSuccess();
+                NotificationManager.show('Launched! 🚀', 'success');
+                fuel = 0;
+                r.style.bottom = '16px';
+            }
+        };
+
+        function setupShake(parent) {
+            parent.innerHTML = `<h3 class="text-2xl font-black text-center mb-4">Shake Energy! 📱</h3>
+                <div id="phone" class="w-32 h-52 mx-auto glass rounded-[2rem] border-4 border-slate-800 flex flex-col items-center p-4 relative mb-6 shadow-2xl overflow-hidden transition-transform duration-100">
+                    <div class="w-12 h-1 bg-slate-800 rounded-full mb-8"></div>
+                    <div class="w-20 h-20 bg-blue-500 rounded-full flex items-center justify-center text-4xl text-white shadow-lg animate-pulse">⚡</div>
+                    <div id="shake-progress" class="absolute bottom-0 left-0 right-0 bg-blue-500/30 w-full" style="height: 0%"></div>
+                    <div class="absolute bottom-4 w-8 h-8 rounded-full border-2 border-slate-800"></div>
+                </div>
+                <p class="text-slate-400 text-center font-bold mb-4">CLICK FAST TO CHARGE!</p>
+                <button onclick="doShake()" class="w-full py-5 bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-black rounded-2xl shadow-xl transform active:scale-95 transition-all">SHAKE!</button>`;
+
+            let charge = 0;
+            window.doShake = () => {
+                charge += 5;
+                score += 1; updateScore();
+                sounds.playClick();
+                const phone = document.getElementById('phone');
+                const progress = document.getElementById('shake-progress');
+                phone.style.transform = `rotate(${(Math.random() - 0.5) * 20}deg) scale(1.05)`;
+                setTimeout(() => phone.style.transform = '', 50);
+                progress.style.height = charge + '%';
+
+                if (charge >= 100) {
+                    charge = 0;
+                    score += 100; updateScore();
+                    sounds.playSuccess();
+                    igniteSpread();
+                    NotificationManager.show('Fully Charged! ⚡', 'success');
+                }
+            };
+        }
+
+        function setupSimon(parent) {
+            parent.innerHTML = `<h3 class="text-2xl font-black">Simon Says 🔴</h3>
+                <div class="grid grid-cols-2 gap-4 max-w-[300px] mx-auto" id="simon-grid">
+                    <div onclick="checkSimon(0)" data-idx="0" class="h-32 bg-red-500/80 rounded-2xl cursor-pointer hover:scale-105 active:scale-95 transition-all shadow-lg border-b-4 border-red-700"></div>
+                    <div onclick="checkSimon(1)" data-idx="1" class="h-32 bg-blue-500/80 rounded-2xl cursor-pointer hover:scale-105 active:scale-95 transition-all shadow-lg border-b-4 border-blue-700"></div>
+                    <div onclick="checkSimon(2)" data-idx="2" class="h-32 bg-green-500/80 rounded-2xl cursor-pointer hover:scale-105 active:scale-95 transition-all shadow-lg border-b-4 border-green-700"></div>
+                    <div onclick="checkSimon(3)" data-idx="3" class="h-32 bg-yellow-500/80 rounded-2xl cursor-pointer hover:scale-105 active:scale-95 transition-all shadow-lg border-b-4 border-yellow-700"></div>
+                </div>
+                <div id="simon-status" class="mt-4 text-center font-black text-slate-900">Click START to play!</div>
+                <button onclick="startSimon()" id="simon-start" class="w-full py-4 bg-slate-900 text-white font-black rounded-2xl mt-4 shadow-xl">START GAME</button>`;
+        }
+        let simonSeq = [];
+        let simonInput = [];
+        let simonPlaying = false;
+
+        window.startSimon = () => {
+            simonSeq = []; simonInput = []; simonPlaying = true;
+            document.getElementById('simon-start').classList.add('hidden');
+            nextSimonRound();
+        };
+
+        window.nextSimonRound = () => {
+            simonInput = [];
+            simonSeq.push(Math.floor(Math.random() * 4));
+            playSimonSeq();
+        };
+
+        window.playSimonSeq = async () => {
+            const status = document.getElementById('simon-status');
+            status.innerText = "WATCH...";
+            const grid = document.querySelectorAll('#simon-grid > div');
+            simonPlaying = false;
+            for (let idx of simonSeq) {
+                await new Promise(r => setTimeout(r, 600));
+                flashSimon(grid[idx], idx);
+            }
+            simonPlaying = true;
+            status.innerText = "YOUR TURN!";
+        };
+
+        window.flashSimon = (el, idx) => {
+            const freqs = [261, 329, 392, 523];
+            sounds.play(freqs[idx], 'sine', 0.3);
+            el.style.filter = 'brightness(2)';
+            el.style.transform = 'scale(1.1)';
+            setTimeout(() => { el.style.filter = ''; el.style.transform = ''; }, 300);
+        };
+
+        window.checkSimon = (idx) => {
+            if (!simonPlaying) return;
+            const grid = document.querySelectorAll('#simon-grid > div');
+            flashSimon(grid[idx], idx);
+            simonInput.push(idx);
+
+            if (simonInput[simonInput.length - 1] !== simonSeq[simonInput.length - 1]) {
+                sounds.playError();
+                NotificationManager.show('Wrong sequence! 💥', 'error');
+                document.getElementById('simon-start').classList.remove('hidden');
+                document.getElementById('simon-start').innerText = "TRY AGAIN";
+                document.getElementById('simon-status').innerText = `Score: ${simonSeq.length - 1}`;
+                simonPlaying = false;
+                return;
+            }
+
+            if (simonInput.length === simonSeq.length) {
+                score += 50; updateScore();
+                sounds.playSuccess();
+                setTimeout(nextSimonRound, 1000);
+            }
+        };
+
+        function setupTicTacToe(parent) {
+            let board = ['', '', '', '', '', '', '', '', ''];
+            let active = true;
+            parent.innerHTML = `
+                <h3 class="text-2xl font-black text-center mb-4 text-slate-800">Tic-Tac-Toe ❌</h3>
+                <div class="grid grid-cols-3 gap-4 w-full max-w-[300px] mx-auto mb-4" id="ttt-grid">
+                    ${board.map((_, i) => `<div onclick="playTTT(${i})" data-idx="${i}" class="h-24 glass flex items-center justify-center text-5xl font-black cursor-pointer hover:bg-white/50 transition-all rounded-3xl border-b-8 border-slate-200"></div>`).join('')}
+                </div>
+                <div id="ttt-status" class="text-center font-bold text-slate-600 bg-slate-50 py-2 px-6 rounded-full inline-block mx-auto mb-2">Your turn (X)</div>`;
+
+            window.playTTT = (idx) => {
+                if (!active || board[idx] !== '') return;
+                board[idx] = 'X';
+                updateTTT();
+                if (checkTTTWin('X')) { finishTTT('You Win! 🎉'); return; }
+                if (board.every(b => b !== '')) { finishTTT('Draw! 🤝'); return; }
+
+                active = false;
+                document.getElementById('ttt-status').innerText = "AI is thinking...";
+                setTimeout(() => {
+                    const winMove = getBestMove('O');
+                    const blockMove = getBestMove('X');
+                    let move = -1;
+                    if (winMove !== -1) {
+                        move = winMove;
+                    } else if (blockMove !== -1) {
+                        move = blockMove;
+                    } else {
+                        // Try to take center if available
+                        if (board[4] === '') move = 4;
+                        else {
+                            // Take a random available corner or side
+                            const availableMoves = board.map((b, i) => b === '' ? i : null).filter(i => i !== null);
+                            if (availableMoves.length > 0) {
+                                move = availableMoves[Math.floor(Math.random() * availableMoves.length)];
+                            }
+                        }
+                    }
+
+                    if (move !== -1) {
+                        board[move] = 'O';
+                        updateTTT();
+                        active = true;
+                        document.getElementById('ttt-status').innerText = "Your turn (X)";
+                        if (checkTTTWin('O')) finishTTT('AI Won! 🤖');
+                        else if (board.every(b => b !== '')) finishTTT('Draw! 🤝');
+                    } else {
+                        // Should not happen if board is not full
+                        finishTTT('Draw! 🤝');
+                    }
+                }, 600);
+            };
+
+            const getBestMove = (p) => {
+                const wins = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
+                for (let w of wins) {
+                    const vals = w.map(i => board[i]);
+                    if (vals.filter(v => v === p).length === 2 && vals.includes('')) {
+                        return w[vals.indexOf('')];
+                    }
+                }
+                return -1;
+            };
+
+            const updateTTT = () => {
+                const cells = document.querySelectorAll('#ttt-grid > div');
+                board.forEach((b, i) => {
+                    cells[i].innerText = b;
+                    if (b) cells[i].className = `h-24 glass flex items-center justify-center text-4xl font-black rounded-2xl border-b-4 transition-all ${b === 'X' ? 'text-blue-600 border-blue-200' : 'text-red-500 border-red-200'}`;
+                });
+                sounds.playClick();
+            };
+
+            const checkTTTWin = (p) => {
+                const wins = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
+                return wins.some(w => w.every(i => board[i] === p));
+            };
+
+            const finishTTT = (res) => {
+                active = false;
+                document.getElementById('ttt-status').innerText = res;
+                if (res.includes('Win')) { score += 50; sounds.playSuccess(); igniteSpread(); }
+                else if (res.includes('Draw')) { score += 10; sounds.playClick(); }
+                else { sounds.playError(); }
+                setTimeout(() => { NotificationManager.show(res, res.includes('Win') ? 'success' : 'info'); launchGame('ttt'); }, 1500);
+            };
+        }
+
+        function setupWhackAMole(parent) {
+            let timeLeft = 20;
+            let mScore = 0;
+            parent.innerHTML = `
+                <h3 class="text-2xl font-black text-center mb-4 text-slate-800">Whack-a-Mole 🔨</h3>
+                <div class="flex justify-between mb-4 w-full max-w-[400px] mx-auto px-4 font-bold text-slate-600">
+                    <div>Time: <span id="mole-time">20</span>s</div>
+                    <div>Score: <span id="mole-score">0</span></div>
+                </div>
+                <div class="grid grid-cols-3 gap-4 w-full max-w-[400px] mx-auto" id="mole-grid">
+                    ${Array(9).fill().map((_, i) => `
+                        <div class="h-24 bg-amber-900/20 rounded-t-full relative overflow-hidden border-b-8 border-amber-900/40">
+                            <div onclick="hitMole(${i})" data-idx="${i}" class="mole absolute inset-0 text-5xl flex items-center justify-center cursor-pointer transition-transform duration-200 translate-y-full">🐹</div>
+                        </div>`).join('')}
+                </div>`;
+
+            const timer = setInterval(() => {
+                timeLeft--;
+                const el = document.getElementById('mole-time');
+                if (el) el.innerText = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    clearInterval(popper);
+                    NotificationManager.show(`Final Score: ${mScore}`, 'info');
+                    closeModal();
+                }
+            }, 1000);
+
+            const popper = setInterval(() => {
+                const moles = document.querySelectorAll('.mole');
+                const idx = Math.floor(Math.random() * 9);
+                const mole = moles[idx];
+                mole.classList.remove('translate-y-full');
+                setTimeout(() => mole.classList.add('translate-y-full'), 800 + Math.random() * 500);
+            }, 1000);
+
+            window.hitMole = (i) => {
+                const mole = document.querySelectorAll('.mole')[i];
+                if (mole.classList.contains('translate-y-full')) return;
+                mScore++;
+                score += 5; updateScore();
+                sounds.playPop();
+                mole.innerText = '💥';
+                mole.classList.add('translate-y-full');
+                document.getElementById('mole-score').innerText = mScore;
+                setTimeout(() => mole.innerText = '🐹', 300);
+            };
+
+            const oldClose = closeModal;
+            window.closeModal = () => { clearInterval(timer); clearInterval(popper); window.closeModal = oldClose; oldClose(); };
+        }
+
+        function setupSnake(parent) {
+            parent.innerHTML = `
+                <h3 class="text-2xl font-black text-center mb-4 text-slate-800">Snake 🐍</h3>
+                <canvas id="snake-canvas" class="bg-slate-900 rounded-2xl mx-auto shadow-2xl" width="300" height="300"></canvas>
+                <div class="mt-4 text-center text-slate-400 font-bold">Use ARROW KEYS to move</div>`;
+
+            const canvas = document.getElementById('snake-canvas');
+            const ctx = canvas.getContext('2d');
+            const box = 15;
+            let snake = [{ x: 10 * box, y: 10 * box }];
+            let food = { x: Math.floor(Math.random() * 19 + 1) * box, y: Math.floor(Math.random() * 19 + 1) * box };
+            let dir;
+
+            const handleKey = (e) => {
+                if (e.keyCode == 37 && dir != "RIGHT") dir = "LEFT";
+                else if (e.keyCode == 38 && dir != "DOWN") dir = "UP";
+                else if (e.keyCode == 39 && dir != "LEFT") dir = "RIGHT";
+                else if (e.keyCode == 40 && dir != "UP") dir = "DOWN";
+            };
+            window.addEventListener("keydown", handleKey);
+
+            const draw = () => {
+                ctx.fillStyle = "#0f172a";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                for (let i = 0; i < snake.length; i++) {
+                    ctx.fillStyle = i == 0 ? "#3b82f6" : "#60a5fa";
+                    ctx.fillRect(snake[i].x, snake[i].y, box - 1, box - 1);
+                }
+
+                ctx.fillStyle = "#ef4444";
+                ctx.fillRect(food.x, food.y, box - 1, box - 1);
+
+                let headX = snake[0].x;
+                let headY = snake[0].y;
+
+                if (dir == "LEFT") headX -= box;
+                if (dir == "UP") headY -= box;
+                if (dir == "RIGHT") headX += box;
+                if (dir == "DOWN") headY += box;
+
+                if (headX == food.x && headY == food.y) {
+                    score += 10; updateScore();
+                    sounds.playSuccess();
+                    food = { x: Math.floor(Math.random() * 19 + 1) * box, y: Math.floor(Math.random() * 19 + 1) * box };
+                } else {
+                    snake.pop();
+                }
+
+                let newHead = { x: headX, y: headY };
+
+                if (headX < 0 || headX >= canvas.width || headY < 0 || headY >= canvas.height || collision(newHead, snake)) {
+                    clearInterval(gameLoop);
+                    window.removeEventListener("keydown", handleKey);
+                    sounds.playError();
+                    NotificationManager.show(`Game Over! Score: ${snake.length}`, 'error');
+                    setTimeout(() => launchGame('snake'), 1000);
+                }
+
+                snake.unshift(newHead);
+            };
+
+            const collision = (head, array) => {
+                for (let i = 0; i < array.length; i++) {
+                    if (head.x == array[i].x && head.y == array[i].y) return true;
+                }
+                return false;
+            };
+
+            let gameLoop = setInterval(draw, 100);
+
+            const oldClose = closeModal;
+            window.closeModal = () => { clearInterval(gameLoop); window.removeEventListener("keydown", handleKey); window.closeModal = oldClose; oldClose(); };
+        }
+
+        function setupPong(parent) {
+            parent.innerHTML = `
+                <h3 class="text-2xl font-black text-center mb-4 text-slate-800">Ping Pong 🏓</h3>
+                <canvas id="pong-canvas" class="bg-slate-900 rounded-2xl mx-auto shadow-2xl" width="400" height="300"></canvas>
+                <p class="mt-4 text-center text-slate-400 font-bold">Use Mouse/Touch to move paddle</p>`;
+
+            const canvas = document.getElementById('pong-canvas');
+            const ctx = canvas.getContext('2d');
+
+            let ball = { x: 200, y: 150, dx: 4, dy: 4, radius: 8 };
+            let paddle = { y: 120, width: 10, height: 60 };
+            let aiPaddle = { y: 120, width: 10, height: 60 };
+
+            canvas.onmousemove = (e) => {
+                const rect = canvas.getBoundingClientRect();
+                paddle.y = e.clientY - rect.top - paddle.height / 2;
+            };
+
+            const draw = () => {
+                ctx.fillStyle = "#0f172a";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Ball
+                ctx.fillStyle = "#ffffff";
+                ctx.beginPath();
+                ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Paddles
+                ctx.fillStyle = "#3b82f6"; ctx.fillRect(0, paddle.y, paddle.width, paddle.height);
+                ctx.fillStyle = "#ef4444"; ctx.fillRect(canvas.width - aiPaddle.width, aiPaddle.y, aiPaddle.width, aiPaddle.height);
+
+                ball.x += ball.dx;
+                ball.y += ball.dy;
+
+                if (ball.y < 0 || ball.y > canvas.height) ball.dy *= -1;
+
+                // AI
+                aiPaddle.y += (ball.y - (aiPaddle.y + aiPaddle.height / 2)) * 0.1;
+
+                if (ball.x < paddle.width && ball.y > paddle.y && ball.y < paddle.y + paddle.height) {
+                    ball.dx *= -1.1; sounds.playClick();
+                }
+                if (ball.x > canvas.width - aiPaddle.width && ball.y > aiPaddle.y && ball.y < aiPaddle.y + aiPaddle.height) {
+                    ball.dx *= -1.1; sounds.playClick();
+                }
+
+                if (ball.x < 0) {
+                    clearInterval(game); sounds.playError();
+                    NotificationManager.show('AI Scored! 🤖', 'error');
+                    setTimeout(() => launchGame('pong'), 1000);
+                }
+                if (ball.x > canvas.width) {
+                    clearInterval(game); sounds.playSuccess(); score += 50; updateScore();
+                    NotificationManager.show('You Scored! 🎉', 'success');
+                    setTimeout(() => launchGame('pong'), 1000);
+                }
+            };
+            let game = setInterval(draw, 1000 / 60);
+            const oldClose = closeModal;
+            window.closeModal = () => { clearInterval(game); window.closeModal = oldClose; oldClose(); };
+        }
+
+        function setupBreakout(parent) {
+            parent.innerHTML = `
+                <h3 class="text-2xl font-black text-center mb-4 text-slate-800">Breakout 🧱</h3>
+                <canvas id="breakout-canvas" class="bg-slate-900 rounded-2xl mx-auto shadow-2xl" width="400" height="300"></canvas>`;
+
+            const canvas = document.getElementById('breakout-canvas');
+            const ctx = canvas.getContext('2d');
+
+            let ball = { x: 200, y: 250, dx: 3, dy: -3, radius: 7 };
+            let paddle = { x: 150, width: 80, height: 10 };
+            let bricks = [];
+            for (let r = 0; r < 4; r++) for (let c = 0; c < 7; c++) bricks.push({ x: c * 55 + 10, y: r * 25 + 40, active: true });
+
+            canvas.onmousemove = (e) => {
+                const rect = canvas.getBoundingClientRect();
+                paddle.x = e.clientX - rect.left - paddle.width / 2;
+            };
+
+            const draw = () => {
+                ctx.fillStyle = "#0f172a";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.fillStyle = "#ffffff";
+                ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2); ctx.fill();
+
+                ctx.fillStyle = "#3b82f6";
+                ctx.fillRect(paddle.x, canvas.height - paddle.height - 10, paddle.width, paddle.height);
+
+                bricks.forEach(b => {
+                    if (b.active) {
+                        ctx.fillStyle = "#fbbf24";
+                        ctx.fillRect(b.x, b.y, 50, 20);
+                        if (ball.x > b.x && ball.x < b.x + 50 && ball.y > b.y && ball.y < b.y + 20) {
+                            ball.dy *= -1; b.active = false;
+                            score += 10; updateScore(); sounds.playPop();
+                        }
+                    }
+                });
+
+                ball.x += ball.dx; ball.y += ball.dy;
+                if (ball.x < 0 || ball.x > canvas.width) ball.dx *= -1;
+                if (ball.y < 0) ball.dy *= -1;
+
+                if (ball.y > canvas.height - paddle.height - 10 && ball.x > paddle.x && ball.x < paddle.x + paddle.width) {
+                    ball.dy *= -1; sounds.playClick();
+                }
+
+                if (ball.y > canvas.height) {
+                    clearInterval(game); sounds.playError();
+                    NotificationManager.show('Game Over! 💔', 'error');
+                    setTimeout(() => launchGame('break'), 1000);
+                }
+                if (bricks.every(b => !b.active)) {
+                    clearInterval(game); sounds.playSuccess(); igniteSpread();
+                    NotificationManager.show('Level Cleared! 🏆', 'success');
+                    setTimeout(() => launchGame('break'), 1000);
+                }
+            };
+            let game = setInterval(draw, 1000 / 60);
+            const oldClose = closeModal;
+            window.closeModal = () => { clearInterval(game); window.closeModal = oldClose; oldClose(); };
+        }
+
+        function setupHangman(parent) {
+            const words = ['APPLE', 'BANANA', 'KITTEN', 'HAPPY', 'CANDY', 'ROBOT', 'PIZZA', 'MAGIC'];
+            let word = words[Math.floor(Math.random() * words.length)];
+            let guessed = [];
+            let mistakes = 0;
+
+            const drawGallows = (ctx, m) => {
+                ctx.lineWidth = 4; ctx.strokeStyle = '#334155';
+                ctx.beginPath();
+                if (m >= 1) { ctx.moveTo(20, 180); ctx.lineTo(180, 180); } // Base
+                if (m >= 2) { ctx.moveTo(50, 180); ctx.lineTo(50, 20); ctx.lineTo(130, 20); ctx.lineTo(130, 40); } // Frame
+                if (m >= 3) { ctx.moveTo(145, 55); ctx.arc(130, 55, 15, 0, Math.PI * 2); } // Head
+                if (m >= 4) { ctx.moveTo(130, 70); ctx.lineTo(130, 130); } // Body
+                if (m >= 5) { ctx.moveTo(130, 85); ctx.lineTo(100, 110); ctx.moveTo(130, 85); ctx.lineTo(160, 110); } // Arms
+                if (m >= 6) { ctx.moveTo(130, 130); ctx.lineTo(105, 160); ctx.moveTo(130, 130); ctx.lineTo(155, 160); } // Legs
+                ctx.stroke();
+            };
+
+            const updateUI = () => {
+                parent.innerHTML = `
+                <h3 class="text-2xl font-black text-center mb-4 text-slate-800 tracking-tight">Hangman Challenge 🪢</h3>
+                <div class="flex flex-col md:flex-row gap-8 items-center justify-center w-full max-w-2xl mx-auto">
+                    <canvas id="hang-canvas" width="200" height="200" class="bg-slate-50 rounded-2xl shadow-inner"></canvas>
+                    <div class="flex-1 space-y-6 w-full">
+                        <div class="text-center text-4xl tracking-[0.5em] font-black text-slate-900 drop-shadow-sm">
+                            ${word.split('').map(l => guessed.includes(l) ? l : '_').join('')}
+                        </div>
+                        <div class="grid grid-cols-6 gap-2 w-full">
+                            ${'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(l => `
+                                <button onclick="guessHang('${l}')" class="p-2 glass text-xs font-bold ${guessed.includes(l) ? 'opacity-20 pointer-events-none' : 'hover:bg-blue-50 transform hover:scale-105'}">${l}</button>
+                            `).join('')}
+                        </div>
+                        <div class="text-center font-black ${mistakes > 4 ? 'text-red-500 animate-pulse' : 'text-slate-400'} uppercase text-xs tracking-widest">Lives Hidden: ${6 - mistakes}</div>
+                    </div>
+                </div>`;
+                const ctx = document.getElementById('hang-canvas').getContext('2d');
+                drawGallows(ctx, mistakes);
+            };
+
+            window.guessHang = (l) => {
+                if (guessed.includes(l)) return;
+                guessed.push(l);
+                if (!word.includes(l)) {
+                    mistakes++; sounds.playError();
+                } else {
+                    sounds.playSuccess();
+                }
+
+                if (mistakes >= 6) {
+                    updateUI();
+                    setTimeout(() => {
+                        NotificationManager.show(`The secret word was ${word}! 💨`, 'error');
+                        launchGame('hang');
+                    }, 500);
+                } else if (word.split('').every(l => guessed.includes(l))) {
+                    updateUI();
+                    score += 150 * (6 - mistakes); updateScore(); sounds.playSuccess(); igniteSpread();
+                    NotificationManager.show('Hero Status! 🏆', 'success');
+                    setTimeout(() => launchGame('hang'), 1500);
+                } else {
+                    updateUI();
+                }
+            };
+            updateUI();
+        }
+
+        function setupQuiz(parent) {
+            const qs = [
+                { q: "What color is an apple?", a: ["Red", "Blue", "Black", "Purple"], c: 0 },
+                { q: "How many legs does a dog have?", a: ["2", "3", "4", "5"], c: 2 },
+                { q: "Which animal says 'Meow'?", a: ["Dog", "Cat", "Cow", "Lion"], c: 1 },
+                { q: "What is 2 + 2?", a: ["3", "4", "5", "6"], c: 1 },
+                { q: "What is the color of the sky?", a: ["Green", "Blue", "Red", "Yellow"], c: 1 },
+                { q: "How many fingers on one hand?", a: ["4", "5", "6", "10"], c: 1 },
+                { q: "Which fruit is yellow?", a: ["Apple", "Grape", "Banana", "Cherry"], c: 2 },
+                { q: "Where does a fish live?", a: ["Tree", "Sky", "Water", "Cave"], c: 2 },
+                { q: "What is 5 - 3?", a: ["1", "2", "3", "4"], c: 1 },
+                { q: "Which animal is the tallest?", a: ["Shorty", "Cat", "Giraffe", "Ant"], c: 2 },
+                { q: "What color is a carrot?", a: ["Orange", "Pink", "Black", "Teal"], c: 0 },
+                { q: "How many wheels on a bicycle?", a: ["1", "2", "3", "4"], c: 1 },
+                { q: "What animal gives us milk?", a: ["Cat", "Cow", "Bird", "Snake"], c: 1 },
+                { q: "What is 10 + 0?", a: ["0", "1", "10", "100"], c: 2 },
+                { q: "Which is a square?", a: ["Circle", "Triangle", "Box", "Line"], c: 2 },
+                { q: "What do bees make?", a: ["Milk", "Honey", "Bread", "Water"], c: 1 },
+                { q: "What color are most leaves?", a: ["Red", "Green", "White", "Blue"], c: 1 },
+                { q: "How many eyes do humans have?", a: ["1", "2", "3", "4"], c: 1 },
+                { q: "Which is the biggest?", a: ["Elephant", "Mouse", "Spider", "Bee"], c: 0 },
+                { q: "What is 1 + 1?", a: ["1", "2", "3", "11"], c: 1 },
+                { q: "What shape is a ball?", a: ["Square", "Circle", "Triangle", "Star"], c: 1 },
+                { q: "What color are bananas?", a: ["Pink", "Yellow", "Blue", "Gray"], c: 1 },
+                { q: "Which animal can fly?", a: ["Dog", "Cat", "Bird", "Lion"], c: 2 },
+                { q: "What do cows eat?", a: ["Candy", "Grass", "Pizza", "Burgers"], c: 1 },
+                { q: "How many months in a year?", a: ["7", "10", "12", "24"], c: 2 },
+                { q: "Which is a cold drink?", a: ["Hot Cocoa", "Ice Tea", "Soup", "Tea"], c: 1 },
+                { q: "What color is snow?", a: ["Green", "White", "Black", "Silver"], c: 1 },
+                { q: "How many toes on each foot?", a: ["2", "5", "8", "10"], c: 1 },
+                { q: "Which animal has a trunk?", a: ["Hippo", "Elephant", "Zebra", "Lion"], c: 1 },
+                { q: "What do you wear on your head?", a: ["Shoe", "Hat", "Sock", "Glove"], c: 1 },
+                { q: "What is 3 * 2?", a: ["3", "5", "6", "9"], c: 2 },
+                { q: "Which is a hot object?", a: ["Ice", "Sun", "Cloud", "Moon"], c: 1 },
+                { q: "What do you use to write?", a: ["Fork", "Spoon", "Pencil", "Plate"], c: 2 },
+                { q: "What color is a stop sign?", a: ["Green", "Blue", "Red", "Yellow"], c: 2 },
+                { q: "How many sides does a triangle have?", a: ["2", "3", "4", "5"], c: 1 },
+                { q: "Which animal has a long neck?", a: ["Cat", "Giraffe", "Tiger", "Dog"], c: 1 },
+                { q: "What do you use to see?", a: ["Ears", "Nose", "Eyes", "Mouth"], c: 2 },
+                { q: "What is 4 + 4?", a: ["4", "8", "12", "16"], c: 1 },
+                { q: "Which is a pet?", a: ["Lion", "Dog", "Shark", "Tiger"], c: 1 },
+                { q: "What color are grapes?", a: ["Orange", "Purple", "Pink", "Silver"], c: 1 },
+                { q: "How many legs on a spider?", a: ["4", "6", "8", "10"], c: 2 },
+                { q: "Which animal is the King of Jungle?", a: ["Lion", "Monkey", "Rabbit", "Mouse"], c: 0 },
+                { q: "What is 6 - 1?", a: ["3", "4", "5", "6"], c: 2 },
+                { q: "Which is a fast animal?", a: ["Cheetah", "Turtle", "Snail", "Sloth"], c: 0 },
+                { q: "What color are clouds?", a: ["Black", "White", "Teal", "Pink"], c: 1 },
+                { q: "How many suns do we have?", a: ["1", "2", "3", "many"], c: 0 },
+                { q: "Which is a farm animal?", a: ["Sheep", "Shark", "Whale", "Octopus"], c: 0 },
+                { q: "What is 5 + 5?", a: ["5", "10", "15", "55"], c: 1 },
+                { q: "Which is used to brush teeth?", a: ["Comb", "Brush", "Toothbrush", "Soap"], c: 2 },
+                { q: "What color is the grass?", a: ["Blue", "Red", "Green", "Yellow"], c: 2 }
+            ].sort(() => Math.random() - 0.5);
+            let pool = qs.slice(0, 10); // Take 10 random
+            let cur = 0;
+            let qScore = 0;
+
+            const nextQ = () => {
+                if (cur >= qs.length) {
+                    score += qScore * 25; updateScore();
+                    NotificationManager.show(`Quiz Over! Score: ${qScore}/${pool.length}`, 'success');
+                    launchGame('quiz');
+                    return;
+                }
+                const item = qs[cur];
+                parent.innerHTML = `
+                    <h3 class="text-2xl font-black text-center mb-6 text-slate-800 tracking-tight">Easy Quiz! 🌟</h3>
+                    <div class="mb-4 text-xs font-black text-slate-400 tracking-widest uppercase text-center">Question ${cur + 1} of ${qs.length}</div>
+                    <div class="text-xl font-bold mb-8 text-slate-900">${item.q}</div>
+                    <div class="grid gap-4 w-full">
+                        ${item.a.map((opt, i) => `<button onclick="checkQuiz(${i})" class="w-full py-4 glass text-left px-6 font-bold hover:bg-blue-600 hover:text-white transition-all rounded-2xl">${opt}</button>`).join('')}
+                    </div>`;
+            };
+
+            window.checkQuiz = (i) => {
+                if (i === pool[cur].c) {
+                    qScore++; sounds.playSuccess();
+                    NotificationManager.show('Correct! ✨', 'success');
+                } else {
+                    sounds.playError();
+                    NotificationManager.show('Wrong! ❌', 'error');
+                }
+                cur++;
+                setTimeout(nextQ, 600);
+            };
+            nextQ();
+        }
+
+        function setupSlidePuzzle(parent) {
+            let tiles = [1, 2, 3, 4, 5, 6, 7, 8, null];
+            const shuffle = () => {
+                for (let i = 0; i < 100; i++) {
+                    const idx = tiles.indexOf(null);
+                    const neighbors = [];
+                    if (idx % 3 > 0) neighbors.push(idx - 1);
+                    if (idx % 3 < 2) neighbors.push(idx + 1);
+                    if (idx > 2) neighbors.push(idx - 3);
+                    if (idx < 6) neighbors.push(idx + 3);
+                    const rand = neighbors[Math.floor(Math.random() * neighbors.length)];
+                    [tiles[idx], tiles[rand]] = [tiles[rand], tiles[idx]];
+                }
+            };
+            shuffle();
+
+            const drawBoard = () => {
+                parent.innerHTML = `
+                    <h3 class="text-2xl font-black text-center mb-4 text-slate-800">Slide Puzzle 🔢</h3>
+                    <div class="grid grid-cols-3 gap-2 max-w-[300px] mx-auto" id="puzzle-grid">
+                        ${tiles.map((t, i) => `
+                            <div onclick="moveTile(${i})" class="h-20 glass flex items-center justify-center text-2xl font-black cursor-pointer rounded-xl border-b-4 ${t === null ? 'opacity-0 pointer-events-none' : 'border-slate-200'}">
+                                ${t || ''}
+                            </div>
+                        `).join('')}
+                    </div>`;
+            };
+
+            window.moveTile = (i) => {
+                const nullIdx = tiles.indexOf(null);
+                const isAdjacent = (Math.abs(i - nullIdx) === 1 && Math.floor(i / 3) === Math.floor(nullIdx / 3)) || (Math.abs(i - nullIdx) === 3);
+                if (isAdjacent) {
+                    [tiles[i], tiles[nullIdx]] = [tiles[nullIdx], tiles[i]];
+                    sounds.playClick();
+                    drawBoard();
+                    if (tiles.slice(0, 8).every((t, idx) => t === idx + 1)) {
+                        score += 200; updateScore(); sounds.playSuccess(); igniteSpread();
+                        NotificationManager.show('Puzzle Solved! 🧩', 'success');
+                        setTimeout(() => launchGame('slide'), 1500);
+                    }
+                }
+            };
+            drawBoard();
+        }
+
+        function setupConnectFour(parent) {
+            let board = Array(6).fill().map(() => Array(7).fill(null));
+            let curPlayer = 'Y'; // Yellow vs Red
+
+            const drawBoard = () => {
+                parent.innerHTML = `
+                    <h3 class="text-2xl font-black text-center mb-4 text-slate-800">Connect 4 🟡</h3>
+                    <div class="grid grid-cols-7 gap-2 bg-blue-600 p-4 rounded-3xl shadow-2xl mx-auto" id="c4-grid">
+                        ${board.map((row, r) => row.map((cell, c) => `
+                            <div onclick="dropC4(${c})" class="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-blue-800 bg-blue-900 shadow-inner flex items-center justify-center p-1">
+                                <div class="w-full h-full rounded-full transition-all duration-500 transform ${cell === 'Y' ? 'bg-yellow-400 scale-100 shadow-lg' : cell === 'R' ? 'bg-red-500 scale-100 shadow-lg' : 'scale-0'}"></div>
+                            </div>
+                        `).join('')).join('')}
+                    </div>
+                    <div class="mt-4 text-center font-bold ${curPlayer === 'Y' ? 'text-yellow-600' : 'text-red-500'}">
+                        ${curPlayer === 'Y' ? "Yellow's Turn" : "Red's Turn"}
+                    </div>`;
+            };
+
+            window.dropC4 = (c) => {
+                for (let r = 5; r >= 0; r--) {
+                    if (!board[r][c]) {
+                        board[r][c] = curPlayer;
+                        sounds.playClick();
+                        if (checkC4Win(r, c)) {
+                            drawBoard();
+                            score += 150; updateScore(); sounds.playSuccess(); igniteSpread();
+                            NotificationManager.show(`${curPlayer === 'Y' ? 'Yellow' : 'Red'} Wins! 🏆`, 'success');
+                            setTimeout(() => launchGame('c4'), 1500);
+                            return;
+                        }
+                        curPlayer = curPlayer === 'Y' ? 'R' : 'Y';
+                        drawBoard();
+                        return;
+                    }
+                }
+            };
+
+            const checkC4Win = (r, c) => {
+                const player = board[r][c];
+                const dirs = [[0, 1], [1, 0], [1, 1], [1, -1]];
+                return dirs.some(([dr, dc]) => {
+                    let count = 1;
+                    [[1, 1], [-1, -1]].forEach(([sign, _]) => {
+                        let nr = r + dr * sign, nc = c + dc * sign;
+                        while (nr >= 0 && nr < 6 && nc >= 0 && nc < 7 && board[nr][nc] === player) {
+                            count++; nr += dr * sign; nc += dc * sign;
+                        }
+                    });
+                    return count >= 4;
+                });
+            };
+            drawBoard();
+        }
+
+        function setupMinesweeper(parent) {
+            const size = 10, mines = 15;
+            let board = Array(size).fill().map(() => Array(size).fill(0));
+            let revealed = Array(size).fill().map(() => Array(size).fill(false));
+            let flagged = Array(size).fill().map(() => Array(size).fill(false));
+            let mineLocs = [];
+
+            while (mineLocs.length < mines) {
+                let r = Math.floor(Math.random() * size), c = Math.floor(Math.random() * size);
+                if (board[r][c] !== 'M') { board[r][c] = 'M'; mineLocs.push([r, c]); }
+            }
+
+            for (let r = 0; r < size; r++) for (let c = 0; c < size; c++) {
+                if (board[r][c] === 'M') continue;
+                let count = 0;
+                for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) {
+                    if (r + i >= 0 && r + i < size && c + j >= 0 && c + j < size && board[r + i][c + j] === 'M') count++;
+                }
+                board[r][c] = count;
+            }
+
+            const draw = () => {
+                parent.innerHTML = `
+                    <h3 class="text-2xl font-black text-center mb-4 text-slate-800">Minesweeper 💣</h3>
+                    <div class="flex justify-between mb-2 text-sm font-bold text-slate-500">
+                      <div>Mines: ${mines}</div>
+                      <div>Right-click to flag 🚩</div>
+                    </div>
+                    <div class="grid grid-cols-10 gap-1 bg-slate-300 p-1 rounded-xl mx-auto shadow-inner" style="width: fit-content">
+                        ${board.map((row, r) => row.map((cell, c) => {
+                    const isRevealed = revealed[r][c];
+                    const isFlagged = flagged[r][c];
+                    let content = '';
+                    let style = 'bg-slate-500 hover:bg-slate-400';
+                    let textColor = 'text-transparent';
+
+                    if (isRevealed) {
+                        style = 'bg-white shadow-inner';
+                        if (cell === 'M') {
+                            content = '💣';
+                            style = 'bg-red-500';
+                        } else {
+                            content = cell || '';
+                            const colors = ['', 'text-blue-600', 'text-green-600', 'text-red-600', 'text-purple-600', 'text-amber-600', 'text-cyan-600', 'text-black', 'text-slate-500'];
+                            textColor = colors[cell] || 'text-slate-900';
+                        }
+                    } else if (isFlagged) {
+                        content = '🚩';
+                        style = 'bg-slate-500';
+                        textColor = 'text-white';
+                    }
+
+                    return `<div onclick="revealMine(${r},${c})" oncontextmenu="flagMine(event, ${r},${c})" class="w-8 h-8 flex items-center justify-center text-sm font-black cursor-pointer rounded-sm transition-all ${style} ${textColor}">
+                                ${content}
+                            </div>`;
+                }).join('')).join('')}
+                    </div>`;
+            };
+
+            window.flagMine = (e, r, c) => {
+                e.preventDefault();
+                if (revealed[r][c]) return;
+                flagged[r][c] = !flagged[r][c];
+                sounds.playClick();
+                draw();
+            };
+
+            window.revealMine = (r, c) => {
+                if (revealed[r][c] || flagged[r][c]) return;
+                revealed[r][c] = true;
+                if (board[r][c] === 'M') {
+                    sounds.playError(); NotificationManager.show('BOOM! 💥', 'error');
+                    mineLocs.forEach(([mr, mc]) => revealed[mr][mc] = true);
+                    draw();
+                    setTimeout(() => launchGame('mine'), 2000);
+                } else {
+                    sounds.playPop();
+                    if (board[r][c] === 0) {
+                        for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) {
+                            if (r + i >= 0 && r + i < size && c + j >= 0 && c + j < size) revealMine(r + i, c + j);
+                        }
+                    }
+                    const revealedCount = revealed.flat().filter(rev => rev).length;
+                    if (revealedCount === size * size - mines) {
+                        score += 500; updateScore(); sounds.playSuccess(); igniteSpread();
+                        NotificationManager.show('Clear! 🏆', 'success');
+                        mineLocs.forEach(([mr, mc]) => flagged[mr][mc] = true);
+                        draw();
+                        setTimeout(() => launchGame('mine'), 2000);
+                    }
+                    draw();
+                }
+            };
+            draw();
+        }
+
+        function setupFlappyBird(parent) {
+            parent.innerHTML = `
+                <h3 class="text-2xl font-black text-center mb-4 text-slate-800">Flappy Clone 🐦</h3>
+                <div class="relative mx-auto" style="width: 320px;">
+                    <canvas id="flap-canvas" class="bg-sky-400 rounded-2xl shadow-2xl" width="320" height="400"></canvas>
+                    <div id="flap-score" class="absolute top-4 left-4 glass px-4 py-1 font-black text-white text-xl shadow-lg">0</div>
+                </div>
+                <p class="mt-4 text-center text-slate-400 font-bold">Space/Up/Click to Fly</p>`;
+            const canvas = document.getElementById('flap-canvas'), ctx = canvas.getContext('2d');
+            let bird = { y: 200, v: 0, r: 14, angle: 0 }, gravity = 0.4, pipes = [], pipeInterval = 0, fScore = 0;
+
+            const jump = () => { bird.v = -7; sounds.playClick(); };
+            canvas.onclick = jump;
+            const handleKey = (e) => { if ([' ', 'ArrowUp', 'w', 'W'].includes(e.key)) { e.preventDefault(); jump(); } };
+            window.addEventListener('keydown', handleKey);
+
+            const draw = () => {
+                // Sky with gradient
+                const grad = ctx.createLinearGradient(0, 0, 0, 400);
+                grad.addColorStop(0, "#38bdf8");
+                grad.addColorStop(1, "#bae6fd");
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, 320, 400);
+
+                bird.v += gravity; bird.y += bird.v;
+                bird.angle = Math.min(Math.PI / 4, Math.max(-Math.PI / 4, bird.v * 0.1));
+
+                // Draw Bird
+                ctx.save();
+                ctx.translate(50, bird.y);
+                ctx.rotate(bird.angle);
+
+                // Body
+                ctx.fillStyle = "#facc15";
+                ctx.beginPath(); ctx.arc(0, 0, bird.r, 0, Math.PI * 2); ctx.fill();
+                ctx.strokeStyle = "#854d0e"; ctx.lineWidth = 2; ctx.stroke();
+
+                // Eye
+                ctx.fillStyle = "white";
+                ctx.beginPath(); ctx.arc(6, -4, 5, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = "black";
+                ctx.beginPath(); ctx.arc(8, -4, 2, 0, Math.PI * 2); ctx.fill();
+
+                // Beak
+                ctx.fillStyle = "#f97316";
+                ctx.beginPath();
+                ctx.moveTo(10, 0);
+                ctx.lineTo(18, 4);
+                ctx.lineTo(10, 8);
+                ctx.fill();
+
+                // Wing
+                ctx.fillStyle = "white";
+                const wingOff = Math.sin(Date.now() / 100) * 5;
+                ctx.beginPath();
+                ctx.ellipse(-6, 2, 8, 5 + wingOff, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.restore();
+
+                if (pipeInterval++ % 90 === 0) pipes.push({ x: 320, h: Math.random() * 180 + 40 });
+                pipes.forEach((p, i) => {
+                    p.x -= 2.5;
+                    // Pipes with depth
+                    const pGrad = ctx.createLinearGradient(p.x, 0, p.x + 45, 0);
+                    pGrad.addColorStop(0, "#16a34a");
+                    pGrad.addColorStop(0.5, "#4ade80");
+                    pGrad.addColorStop(1, "#15803d");
+                    ctx.fillStyle = pGrad;
+
+                    // Top pipe
+                    ctx.fillRect(p.x, 0, 45, p.h);
+                    ctx.strokeRect(p.x, 0, 45, p.h);
+                    // Bottom pipe
+                    ctx.fillRect(p.x, p.h + 110, 45, 400);
+                    ctx.strokeRect(p.x, p.h + 110, 45, 400);
+
+                    if (Math.abs(p.x - 50) < 2) {
+                        fScore++;
+                        document.getElementById('flap-score').innerText = fScore;
+                        sounds.playPop();
+                    }
+
+                    if ((50 + bird.r > p.x && 50 - bird.r < p.x + 45) && (bird.y - bird.r < p.h || bird.y + bird.r > p.h + 110)) {
+                        clearInterval(game); sounds.playError(); NotificationManager.show(`Game Over! Score: ${fScore}`, 'error');
+                        setTimeout(() => launchGame('flap'), 1500);
+                    }
+                });
+                pipes = pipes.filter(p => p.x > -50);
+                if (bird.y > 410 || bird.y < -10) {
+                    clearInterval(game); sounds.playError();
+                    NotificationManager.show(`Fell out! Score: ${fScore}`, 'error');
+                    setTimeout(() => launchGame('flap'), 1500);
+                }
+            };
+            let game = setInterval(draw, 1000 / 60);
+            const oldClose = closeModal;
+            window.closeModal = () => {
+                clearInterval(game);
+                window.removeEventListener('keydown', handleKey);
+                window.closeModal = oldClose;
+                oldClose();
+            };
+        }
+
+        function setupSpaceInvaders(parent) {
+            parent.innerHTML = `
+                <h3 class="text-2xl font-black text-center mb-4 text-slate-800">Space War 👾</h3>
+                <canvas id="space-canvas" class="bg-slate-900 rounded-2xl mx-auto shadow-2xl" width="400" height="300"></canvas>
+                <div class="flex justify-between mt-4 px-8 font-bold text-slate-400">
+                    <div>Level: <span id="space-lvl">1</span></div>
+                    <div>Score: <span id="space-score">0</span></div>
+                </div>
+                <p class="text-center text-slate-500 text-xs mt-2">Arrows/WASD to Move • Space to Shoot</p>`;
+            const canvas = document.getElementById('space-canvas'), ctx = canvas.getContext('2d');
+            let ship = { x: 180, y: 270, w: 40, h: 20 }, bullets = [], invaders = [], direction = 1, moveCount = 0;
+            let level = 1, sScore = 0, keys = {};
+
+            const initInvaders = () => {
+                invaders = [];
+                const rows = 2 + level;
+                for (let r = 0; r < rows; r++) for (let c = 0; c < 8; c++) invaders.push({ x: c * 40 + 40, y: r * 30 + 40, active: true });
+            };
+            initInvaders();
+
+            window.onkeydown = (e) => keys[e.key] = true;
+            window.onkeyup = (e) => keys[e.key] = false;
+
+            const draw = () => {
+                ctx.fillStyle = "#0f172a"; ctx.fillRect(0, 0, 400, 300);
+
+                // Movement
+                if (keys['ArrowLeft'] || keys['a'] || keys['A']) ship.x -= 4;
+                if (keys['ArrowRight'] || keys['d'] || keys['D']) ship.x += 4;
+                ship.x = Math.max(0, Math.min(400 - ship.w, ship.x));
+
+                if (keys[' '] && bullets.length < 3 + level) {
+                    if (!bullets.some(b => b.y > 250)) {
+                        bullets.push({ x: ship.x + 20, y: 260 });
+                        sounds.playNote('G');
+                    }
+                }
+
+                // Ship
+                ctx.fillStyle = "#3b82f6";
+                ctx.beginPath();
+                ctx.moveTo(ship.x + 20, ship.y);
+                ctx.lineTo(ship.x + ship.w, ship.y + ship.h);
+                ctx.lineTo(ship.x, ship.y + ship.h);
+                ctx.fill();
+
+                bullets.forEach((b, bi) => {
+                    b.y -= 7;
+                    ctx.fillStyle = "#22d3ee";
+                    ctx.fillRect(b.x - 2, b.y, 4, 12);
+                    invaders.forEach(inv => {
+                        if (inv.active && b.x > inv.x && b.x < inv.x + 30 && b.y > inv.y && b.y < inv.y + 20) {
+                            inv.active = false; b.y = -100; sScore += 20;
+                            document.getElementById('space-score').innerText = sScore;
+                            ignite(inv.x + 15, inv.y + 10);
+                            sounds.playPop();
+                        }
+                    });
+                });
+                bullets = bullets.filter(b => b.y > 0);
+
+                moveCount++;
+                const speed = Math.max(5, 30 - level * 2);
+                if (moveCount % speed === 0) {
+                    let change = false;
+                    invaders.forEach(inv => { if (inv.active && (inv.x + direction * 10 > 370 || inv.x + direction * 10 < 10)) change = true; });
+                    if (change) { direction *= -1; invaders.forEach(inv => inv.y += 15); }
+                    else invaders.forEach(inv => inv.x += direction * 10);
+                }
+
+                invaders.forEach(inv => {
+                    if (inv.active) {
+                        ctx.fillStyle = "#22c55e";
+                        ctx.fillRect(inv.x, inv.y, 30, 20);
+                        // Eyes for invaders
+                        ctx.fillStyle = "black";
+                        ctx.fillRect(inv.x + 5, inv.y + 5, 4, 4);
+                        ctx.fillRect(inv.x + 21, inv.y + 5, 4, 4);
+
+                        if (inv.y > 250) {
+                            clearInterval(game); sounds.playError();
+                            NotificationManager.show('Invaded! 💀', 'error');
+                            setTimeout(() => launchGame('space'), 1500);
+                        }
+                    }
+                });
+
+                if (invaders.every(inv => !inv.active)) {
+                    level++;
+                    document.getElementById('space-lvl').innerText = level;
+                    sounds.playSuccess();
+                    NotificationManager.show(`Level ${level} Starting! 🚀`, 'success');
+                    initInvaders();
+                    bullets = [];
+                }
+            };
+            let game = setInterval(draw, 1000 / 60);
+            const oldClose = closeModal;
+            window.closeModal = () => {
+                clearInterval(game);
+                window.onkeydown = null;
+                window.onkeyup = null;
+                window.closeModal = oldClose;
+                oldClose();
+            };
+        }
+
+        function setupTetris(parent) {
+            parent.innerHTML = `
+                <h3 class="text-2xl font-black text-center mb-4 text-slate-800">Tetris 🏗️</h3>
+                <canvas id="tetris-canvas" class="bg-slate-800 rounded-xl mx-auto shadow-2xl" width="200" height="360"></canvas>
+                <div class="mt-4 text-center text-slate-400 font-bold uppercase tracking-widest text-xs">Arrows to Move • Up to Rotate</div>`;
+            const canvas = document.getElementById('tetris-canvas'), ctx = canvas.getContext('2d'), W = 200, H = 360, B = 20;
+            let board = Array(18).fill().map(() => Array(10).fill(0));
+            const shapes = [
+                [[1, 1, 1, 1]], // I
+                [[1, 1], [1, 1]], // O
+                [[0, 1, 0], [1, 1, 1]], // T
+                [[1, 1, 0], [0, 1, 1]], // S
+                [[0, 1, 1], [1, 1, 0]], // Z
+                [[1, 0, 0], [1, 1, 1]], // J
+                [[0, 0, 1], [1, 1, 1]]  // L
+            ];
+            const colors = ['#38bdf8', '#facc15', '#d946ef', '#4ade80', '#f87171', '#3b82f6', '#fb923c'];
+            let curIdx = Math.floor(Math.random() * shapes.length);
+            let curShape = shapes[curIdx];
+            let curPos = { x: 4, y: 0 };
+
+            const draw = () => {
+                ctx.fillStyle = "#1e293b"; ctx.fillRect(0, 0, W, H);
+                // Board
+                board.forEach((row, r) => row.forEach((v, c) => {
+                    if (v) {
+                        drawBlock(c, r, colors[v - 1]);
+                    }
+                }));
+                // Current Shape
+                curShape.forEach((row, r) => row.forEach((v, c) => {
+                    if (v) {
+                        drawBlock(curPos.x + c, curPos.y + r, colors[curIdx]);
+                    }
+                }));
+            };
+
+            const drawBlock = (x, y, color) => {
+                const grad = ctx.createLinearGradient(x * B, y * B, (x + 1) * B, (y + 1) * B);
+                grad.addColorStop(0, color);
+                grad.addColorStop(1, "#00000044");
+                ctx.fillStyle = grad;
+                ctx.fillRect(x * B, y * B, B - 1, B - 1);
+                ctx.strokeStyle = "rgba(255,255,255,0.1)";
+                ctx.strokeRect(x * B, y * B, B - 1, B - 1);
+            };
+
+            const collide = (px, py, s) => s.some((row, r) => row.some((v, c) => v && (py + r >= 18 || px + c < 0 || px + c >= 10 || board[py + r][px + c])));
+
+            const merge = () => {
+                curShape.forEach((row, r) => row.forEach((v, c) => { if (v) board[curPos.y + r][curPos.x + c] = curIdx + 1; }));
+                let linesClearing = 0;
+                board = board.filter(row => {
+                    const full = row.every(v => v);
+                    if (full) linesClearing++;
+                    return !full;
+                });
+                while (board.length < 18) board.unshift(Array(10).fill(0));
+
+                if (linesClearing > 0) {
+                    score += [0, 100, 300, 500, 800][linesClearing];
+                    updateScore();
+                    sounds.playSuccess();
+                    igniteSpread();
+                } else {
+                    sounds.playPop();
+                }
+
+                curPos = { x: 4, y: 0 };
+                curIdx = Math.floor(Math.random() * shapes.length);
+                curShape = shapes[curIdx];
+                if (collide(curPos.x, curPos.y, curShape)) {
+                    clearInterval(game); sounds.playError();
+                    NotificationManager.show('Tower Fell! 🏗️', 'error');
+                    setTimeout(() => launchGame('tetris'), 1500);
+                }
+            };
+
+            const handleKey = (e) => {
+                if (e.keyCode == 37 && !collide(curPos.x - 1, curPos.y, curShape)) curPos.x--;
+                if (e.keyCode == 39 && !collide(curPos.x + 1, curPos.y, curShape)) curPos.x++;
+                if (e.keyCode == 40 && !collide(curPos.x, curPos.y + 1, curShape)) curPos.y++;
+                if (e.keyCode == 38) { // rotate
+                    let next = curShape[0].map((_, i) => curShape.map(row => row[i]).reverse());
+                    if (!collide(curPos.x, curPos.y, next)) {
+                        curShape = next;
+                        sounds.playClick();
+                    }
+                }
+                draw();
+            };
+            window.addEventListener('keydown', handleKey);
+
+            let game = setInterval(() => { if (!collide(curPos.x, curPos.y + 1, curShape)) curPos.y++; else merge(); draw(); }, 600);
+            const oldClose = closeModal;
+            window.closeModal = () => {
+                clearInterval(game);
+                window.removeEventListener('keydown', handleKey);
+                window.closeModal = oldClose;
+                oldClose();
+            };
+        }
+
+        function showJoke() {
+            const js = [
+                "What do cows say on Jan 1? Happy Moo Year! 🐮",
+                "Why did 2025 go to the dentist? To get its 2026 checked! 🦷",
+                "What's a snowman's favorite party snack? Ice crispy treats! ⛄",
+                "Why do birds fly south? It's too far to walk! 🐦",
+                "What happened to the firecracker? It had a blast! 💥",
+                "What do you call a fake noodle? An impasta! 🍝",
+                "Why did the tomato turn red? Because it saw the salad dressing! 🍅",
+                "What do you call a bear with no teeth? A gummy bear! 🐻",
+                "Why did the student eat his homework? Because his teacher said it was a piece of cake! 🍰",
+                "What do you call a sleeping dinosaur? A dino-snore! 🦖",
+                "Why did the bicycle fall over? Because it was two-tired! 🚲",
+                "What do you call a cold dog? A chili dog! 🌭",
+                "Why did the math book look sad? Because it had too many problems! 📚",
+                "What do you call a pig that knows karate? A pork chop! 🐷",
+                "Why did the cookie go to the doctor? Because it was feeling crumbly! 🍪",
+                "What do you call a pony with a sore throat? A little horse! 🐴",
+                "Why did the chicken cross the playground? To get to the other slide! 🐔",
+                "What do you call a fish without an eye? A fsh! 🐟",
+                "Why did the music teacher go to jail? Because she was in treble! 🎶",
+                "What do you call a snowman with a six pack? An abdominal snowman! ⛄",
+                "Why did the grape stop in the middle of the road? Because it ran out of juice! 🍇",
+                "What do you call a fly without wings? A walk! 🪰",
+                "Why did the tree go to the dentist? To get a root canal! 🌳",
+                "What do you call a funny mountain? Hill-arious! ⛰️",
+                "Why did the skeleton go to the party alone? Because he had no body to go with! 💀",
+                "What do you call a dinosaur that is an expert in many things? A tea-rex! 🦕",
+                "Why did the banana go to the doctor? Because it wasn't peeling well! 🍌",
+                "What do you call a duck that loves fireworks? A fire-quacker! 🦆",
+                "Why did the orange go to the eye doctor? Because it was losing its zest! 🍊",
+                "What do you call a cat that likes to bowl? An alley cat! 🐱",
+                "Why did the frog go to the hospital? Because it needed an h-op-eration! 🐸",
+                "What do you call a dog that can do magic? A labracadabrador! 🐕",
+                "Why did the pencil go to school? To be sharpen-ed! ✏️",
+                "What do you call a monkey in a tree? A limb-er! 🐒",
+                "Why did the ghost go to the elevator? To lift its spirits! 👻",
+                "What do you call a sheep with no legs? A cloud! 🐑",
+                "Why did the starfish go to the party? Because it was a star! ⭐",
+                "What do you call a bee that can't make up its mind? A maybee! 🐝",
+                "Why did the elephant sit on the marshmallow? Because he didn't want to fall into the hot chocolate! 🐘",
+                "What do you call a alligator in a vest? An investigator! 🐊",
+                "Why did the crab never share? Because he was a little shellfish! 🦀",
+                "What do you call a dinosaur with a big vocabulary? A thesaurus! 🦕",
+                "Why did the whale go to the gym? To get more krill-er! 🐋",
+                "What do you call a magician on a plane? A flying sorcerer! 🪄",
+                "Why did the spider get a job in IT? Because he was a web designer! 🕷️",
+                "What do you call a pig that is always on time? A pork-tual pig! 🐷",
+                "Why did the cat go to the library? Because it wanted to read a meow-s-paper! 🐱",
+                "What do you call a dog that is good at math? A math-iff! 🐕",
+                "Why did the bird join the band? Because it had its own drumsticks! 🐦",
+                "What do you call a snowman in the summer? A puddle! ⛄"
+            ];
+            const joke = js[Math.floor(Math.random() * js.length)];
+            const modal = document.getElementById('game-modal');
+            modal.classList.remove('hidden');
+            document.getElementById('modal-content').innerHTML = `
+                <div class="text-center space-y-8 p-4 w-full">
+                    <div class="text-7xl animate-bounce">🤣</div>
+                    <h3 class="text-3xl font-black text-slate-900 leading-tight p-4 glass rounded-3xl mx-auto max-w-lg">${joke}</h3>
+                    <button onclick="closeModal()" class="w-full max-w-sm py-5 bg-blue-600 text-white font-black rounded-2xl shadow-xl hover:scale-105 transition-all mx-auto block uppercase tracking-widest">Haha! Next! 🎉</button>
+                </div>`;
+        }
+
+        // Global Ignite
+        window.addEventListener('mousedown', (e) => { if (!e.target.closest('.glass') && !e.target.closest('button')) { ignite(e.clientX, e.clientY); score++; updateScore(); } });
+    </script>
+</body>
+
+</html>
