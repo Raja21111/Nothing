@@ -19,9 +19,12 @@
             --text-main: #1e293b;
             --glass-bg: rgba(255, 255, 255, 0.7);
             --card-bg: rgba(255, 255, 255, 0.8);
+            --tooltip-bg: rgba(15, 23, 42, 0.9);
         }
 
         [data-theme="dark"] {
+            --tooltip-bg: rgba(255, 255, 255, 0.9);
+            --text-tooltip: #0f172a;
             --bg-cyan: #0f172a;
             /* Slate 900 */
             --bg-blush: #1e1b4b;
@@ -135,6 +138,40 @@
                 opacity: 1;
                 transform: scale(1) translateY(0);
             }
+        }
+
+
+        .speech-bubble {
+            position: absolute;
+            bottom: 120%;
+            left: 50%;
+            transform: translateX(-50%) scale(0);
+            background: var(--tooltip-bg);
+            color: var(--text-tooltip, white);
+            padding: 1rem 1.5rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 800;
+            width: 200px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none;
+        }
+
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            border: 10px solid transparent;
+            border-top-color: var(--tooltip-bg);
+            margin-left: -10px;
+        }
+
+        .speech-bubble.active {
+            transform: translateX(-50%) scale(1);
         }
 
         #game-area {
@@ -474,11 +511,15 @@
             <!-- Footer Actions -->
             <div class="flex flex-wrap items-center justify-center gap-4">
                 <button onclick="igniteSpread()"
-                    class="px-10 py-5 bg-[var(--primary)] text-white font-black rounded-2xl hover:scale-105 transition-all active:scale-95 flex items-center gap-3 group shadow-xl">
+                    class="px-8 py-5 bg-[var(--primary)] text-white font-black rounded-2xl hover:scale-105 transition-all active:scale-95 flex items-center gap-3 group shadow-xl">
                     <span class="group-hover:rotate-45 transition-transform text-2xl">🎆</span> FIREWORKS
                 </button>
+                <button onclick="showWishLauncher()"
+                    class="px-8 py-5 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-black rounded-2xl hover:scale-105 transition-all active:scale-95 flex items-center gap-3 shadow-xl">
+                    <span class="text-2xl">✨</span> WISH
+                </button>
                 <button onclick="showJoke()"
-                    class="px-10 py-5 glass font-black rounded-2xl hover:bg-white/10 transition-all active:scale-95 flex items-center gap-3 shadow-md">
+                    class="px-8 py-5 glass font-black rounded-2xl hover:bg-white/10 transition-all active:scale-95 flex items-center gap-3 shadow-md">
                     <span class="text-2xl">🤣</span> JOKES
                 </button>
             </div>
@@ -499,14 +540,15 @@
         </div>
 
         <!-- Companion -->
-        <div class="fixed bottom-8 right-8 animate-float cursor-pointer" onclick="igniteSpread()">
-            <div class="glass p-4 flex items-center gap-3">
+        <div class="fixed bottom-8 right-8 animate-float cursor-pointer z-[1000]" onclick="talkToPenguin()">
+            <div id="penguin-bubble" class="speech-bubble">Hello! Happy 2026! 🐧</div>
+            <div class="glass p-4 flex items-center gap-3 hover:scale-110 transition-transform">
                 <div
                     class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-3xl shadow-xl">
                     🐧</div>
                 <div class="text-left hidden lg:block">
-                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">By</div>
-                    <div class="text-base font-black">Muhammad Haseeb</div>
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Guide</div>
+                    <div class="text-base font-black">Pingo</div>
                 </div>
             </div>
         </div>
@@ -591,14 +633,16 @@
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         let particles = [];
-        let score = 0;
+        let score = parseInt(localStorage.getItem('energy_2k26')) || 0;
+        let highScores = JSON.parse(localStorage.getItem('scores_2k26')) || {};
+
 
         function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
         window.addEventListener('resize', resize);
         resize();
 
         // --- Countdown ---
-        const target = new Date('January 01, 2026 00:00:00').getTime();
+        const target = new Date('December 26, 2025 06:22:00').getTime();
         let countsRevealed = false;
 
         const timerInterval = setInterval(() => {
@@ -703,14 +747,13 @@
             sounds.playPop();
             for (let i = 0; i < 30; i++) particles.push(new Particle(x, y, colors[Math.floor(Math.random() * colors.length)]));
         }
-
         function igniteSpread(addScore = true) {
             for (let i = 0; i < 8; i++) {
                 setTimeout(() => {
                     const x = Math.random() * window.innerWidth;
                     const y = Math.random() * window.innerHeight;
                     ignite(x, y);
-                    if (addScore) { score += 5; updateScore(); }
+                    if (addScore) { updateScore(5); }
                 }, i * 150);
             }
         }
@@ -722,10 +765,116 @@
             requestAnimationFrame(animate);
         }
         animate();
+        let comboCount = 0;
+        let lastPopTime = 0;
 
-        function updateScore() { document.getElementById('score').innerText = score; }
+        function updateScore(amount = 0, isPop = false) {
+            if (amount > 0) {
+                if (isPop) {
+                    const now = Date.now();
+                    if (now - lastPopTime < 1000) {
+                        comboCount++;
+                        if (comboCount > 1) {
+                            NotificationManager.show(`COMBO x${comboCount}! 🔥`, 'success');
+                            amount *= comboCount;
+                        }
+                    } else {
+                        comboCount = 1;
+                    }
+                    lastPopTime = now;
+                }
+                score += amount;
+            }
+            document.getElementById('score').innerText = score;
+            localStorage.setItem('energy_2k26', score);
+        }
 
-        // --- Games Definition ---
+        function updateHighScore(gameId, gameScore) {
+            if (!highScores[gameId] || gameScore > highScores[gameId]) {
+                highScores[gameId] = gameScore;
+                localStorage.setItem('scores_2k26', JSON.stringify(highScores));
+                NotificationManager.show(`NEW HIGH SCORE for ${gameId.toUpperCase()}! 🏆`, 'success');
+            }
+        }
+
+        function talkToPenguin() {
+            const bubble = document.getElementById('penguin-bubble');
+            const messages = [
+                "2026 is going to be epic! 🚀",
+                "Have you tried the Rocket Tap yet? 🚀",
+                "Energy is life! Keep charging! ⚡",
+                "I heard there's a secret wish launcher coming... 🎇",
+                "Stay hydrated while you play! 💧",
+                "You're doing great, Champ! 🏆",
+                "Let's make some magic happen! ✨",
+                "Need a joke? Click the joke button! 😂"
+            ];
+            bubble.innerText = messages[Math.floor(Math.random() * messages.length)];
+            bubble.classList.add('active');
+            sounds.playPop();
+            igniteSpread(false);
+            setTimeout(() => bubble.classList.remove('active'), 3000);
+        }
+
+        function showWishLauncher() {
+            const modal = document.getElementById('game-modal');
+            const content = document.getElementById('modal-content');
+            modal.classList.remove('hidden');
+            content.innerHTML = `
+                <div class="text-center space-y-8 p-6 w-full max-w-md">
+                    <h3 class="text-3xl font-black">Your 2026 Wish ✨</h3>
+                    <p class="opacity-60 font-bold uppercase tracking-widest text-xs">What do you want to achieve this year?</p>
+                    <input type="text" id="wish-input" maxlength="12" placeholder="Type your wish..." 
+                        class="w-full bg-white/5 border-2 border-white/10 rounded-2xl p-6 text-center text-2xl font-black focus:border-[var(--primary)] outline-none transition-all shadow-inner">
+                    <button onclick="launchWish()" class="w-full py-6 bg-gradient-to-r from-[var(--primary)] to-pink-500 text-white font-black rounded-2xl shadow-xl hover:scale-105 transition-all uppercase tracking-widest">LAUNCH INTO SPACE! 🚀</button>
+                    <p class="text-[10px] opacity-40">Max 12 characters for the best effect!</p>
+                </div>
+            `;
+            setTimeout(() => document.getElementById('wish-input').focus(), 100);
+        }
+
+        function launchWish() {
+            const input = document.getElementById('wish-input');
+            const wish = input.value.trim().toUpperCase();
+            if (!wish) return NotificationManager.show("Please enter a wish!", "warning");
+
+            closeModal();
+            NotificationManager.show("Launching your wish... 🌠", "success");
+
+            const off = document.createElement('canvas');
+            const octx = off.getContext('2d');
+            off.width = 400; off.height = 100;
+            octx.fillStyle = 'white';
+            octx.font = 'bold 50px "Plus Jakarta Sans"';
+            octx.textAlign = 'center';
+            octx.textBaseline = 'middle';
+            octx.fillText(wish, 200, 50);
+
+            const data = octx.getImageData(0, 0, 400, 100).data;
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 3;
+
+            for (let y = 0; y < 100; y += 4) {
+                for (let x = 0; x < 400; x += 4) {
+                    const idx = (y * 400 + x) * 4;
+                    if (data[idx + 3] > 128) {
+                        setTimeout(() => {
+                            const p = new Particle(centerX + (x - 200), centerY + (y - 50), '#06b6d4');
+                            p.velocity = { x: (Math.random() - 0.5) * 5, y: (Math.random() - 0.5) * 5 };
+                            p.size = 2.5;
+                            p.gravity = 0;
+                            p.friction = 0.98;
+                            p.alpha = 2;
+                            particles.push(p);
+                        }, Math.random() * 500);
+                    }
+                }
+            }
+            updateScore(100);
+            igniteSpread(false);
+            sounds.playSuccess();
+        }
+
         const games = [
             { id: 'pop', icon: '🎈', name: 'Balloon Pop' },
             { id: 'math', icon: '➕', name: 'Magic Math' },
@@ -754,7 +903,29 @@
             { id: 'mine', icon: '💣', name: 'Minesweeper' },
             { id: 'flap', icon: '🐦', name: 'Flappy Clone' },
             { id: 'space', icon: '👾', name: 'Space War' },
-            { id: 'tetris', icon: '🏗️', name: 'Tetris' }
+            { id: 'tetris', icon: '🏗️', name: 'Tetris' },
+            { id: '2048', icon: '🔢', name: '2048' },
+            { id: 'wordle', icon: '🔠', name: 'Wordle 2026' },
+            { id: 'dino', icon: '🦖', name: 'Dino Run' },
+            { id: 'frogger', icon: '🐸', name: 'Frogger' },
+            { id: 'slice', icon: '🍉', name: 'Fruit Slice' },
+            { id: 'search', icon: '🔍', name: 'Word Search' },
+            { id: 'runner', icon: '🏃', name: 'Neon Runner' },
+            { id: 'pac', icon: '🟡', name: 'Pac-Clone' },
+            { id: 'jetpack', icon: '🎒', name: 'Jetpack Neon' },
+            { id: 'match3', icon: '💎', name: 'Crystal Match' },
+            { id: 'typer', icon: '⌨️', name: 'Type Racer' },
+            { id: 'pbreak', icon: '🔨', name: 'Power Breaker' },
+            { id: 'tower', icon: '🏢', name: 'Tower Stack' },
+            { id: 'quest', icon: '⚔️', name: '2026 Quest' },
+            { id: 'ast', icon: '☄️', name: 'Asteroids' },
+            { id: 'centi', icon: '🐛', name: 'Centipede' },
+            { id: 'dk', icon: '🦍', name: 'Donkey Clone' },
+            { id: 'boulder', icon: '💎', name: 'Boulder Dash' },
+            { id: 'lem', icon: '🚶', name: 'Mini Lemmings' },
+            { id: 'qbert', icon: '🧊', name: 'Q-Block' },
+            { id: 'dig', icon: '🚜', name: 'Dig Clone' },
+            { id: 'galaga', icon: '🛸', name: 'Star Galaxy' }
         ];
 
         const grid = document.getElementById('games-grid');
@@ -768,7 +939,7 @@
 
         // --- Game Engine ---
         let gameTimer = null;
-        function launchGame(id) {
+        async function launchGame(id) {
             const modal = document.getElementById('game-modal');
             const content = document.getElementById('modal-content');
             modal.classList.remove('hidden');
@@ -806,13 +977,65 @@
                 case 'flap': setupFlappyBird(content); break;
                 case 'space': setupSpaceInvaders(content); break;
                 case 'tetris': setupTetris(content); break;
+                case '2048': setup2048(content); break;
+                case 'wordle': setupWordle(content); break;
+                case 'dino': setupDino(content); break;
+                case 'frogger': setupFrogger(content); break;
+                case 'slice': setupFruitSlice(content); break;
+                case 'search': setupWordSearch(content); break;
+                case 'runner': setupNeonRunner(content); break;
+                case 'pac': setupPacClone(content); break;
+                case 'jetpack': setupJetpackNeon(content); break;
+                case 'match3': setupCrystalMatch(content); break;
+                case 'typer': setupTypeRacer(content); break;
+                case 'pbreak': setupPowerBreaker(content); break;
+                case 'tower': setupTowerStack(content); break;
+                case 'quest': setupQuest(content); break;
+                case 'ast': setupAsteroids(content); break;
+                case 'centi': setupCentipede(content); break;
+                case 'dk': setupDonkeyClone(content); break;
+                case 'boulder': setupBoulderDash(content); break;
+                case 'lem': setupLemmings(content); break;
+                case 'qbert': setupQbert(content); break;
+                case 'dig': setupDigClone(content); break;
+                case 'galaga': setupStarGalaxy(content); break;
             }
         }
 
         function closeModal() { document.getElementById('game-modal').classList.add('hidden'); if (gameTimer) clearInterval(gameTimer); }
 
+        function renderStartScreen(parent, game) {
+            parent.innerHTML = `
+                <div class="text-center p-8 space-y-8 animate-in fade-in zoom-in duration-300">
+                    <div class="w-32 h-32 bg-gradient-to-br from-[var(--primary)] to-cyan-400 rounded-[2.5rem] flex items-center justify-center text-6xl mx-auto shadow-2xl ring-8 ring-white/5">
+                        ${game.icon}
+                    </div>
+                    <div>
+                        <h3 class="text-4xl font-black mb-2">${game.name}</h3>
+                        <p class="text-slate-400 font-bold uppercase tracking-widest text-xs">Arcade Challenge</p>
+                    </div>
+                    <div class="glass p-6 rounded-[2rem] border border-white/10 max-w-sm mx-auto shadow-inner">
+                        <p class="text-lg font-bold text-slate-700">${game.instructions || 'Click or use keys to play!'}</p>
+                    </div>
+                    <button id="start-btn" class="w-full max-w-sm py-6 bg-gradient-to-r from-[var(--primary)] to-emerald-500 text-white font-black rounded-2xl shadow-xl hover:scale-105 transition-all uppercase tracking-widest text-lg group">
+                        READY? START! <span class="group-hover:ml-2 transition-all">🚀</span>
+                    </button>
+                </div>
+            `;
+            return new Promise(resolve => {
+                document.getElementById('start-btn').onclick = () => {
+                    sounds.playSuccess();
+                    resolve();
+                };
+            });
+        }
+
         // --- Game Implementations ---
-        function setupBalloonPop(parent) {
+        async function setupBalloonPop(parent) {
+            const game = games.find(g => g.id === 'pop');
+            game.instructions = "Pop the balloons as they rise! Don't let them escape. Gold ones are worth more!";
+            await renderStartScreen(parent, game);
+
             parent.innerHTML = `<h3 class="text-2xl font-black text-center mb-4">Balloon Pop! 🎈</h3><div id="game-area" class="h-96 relative bg-sky-50 rounded-3xl overflow-hidden shadow-inner cursor-crosshair"></div>`;
             const area = document.getElementById('game-area');
             gameTimer = setInterval(() => {
@@ -825,7 +1048,7 @@
                 area.appendChild(b);
 
                 b.onclick = (e) => {
-                    score += isGold ? 50 : 5; updateScore();
+                    updateScore(isGold ? 50 : 5, true);
                     ignite(e.clientX, e.clientY);
                     sounds.playPop();
                     if (isGold) NotificationManager.show('JACKPOT! 🌠', 'success');
@@ -840,7 +1063,11 @@
             }, 800);
         }
 
-        function setupMagicMath(parent) {
+        async function setupMagicMath(parent) {
+            const game = games.find(g => g.id === 'math');
+            game.instructions = "Solve the math problem before time runs out! Click the correct answer.";
+            await renderStartScreen(parent, game);
+
             let timeLeft = 12;
             const ops = ['+', '-', '*'];
             const op = ops[Math.floor(Math.random() * ops.length)];
@@ -886,7 +1113,7 @@
             window.checkMath = (n, ans) => {
                 clearInterval(timerInt);
                 if (n === ans) {
-                    score += 20; updateScore();
+                    updateScore(20);
                     sounds.playSuccess();
                     NotificationManager.show('Smart! 🧠', 'success');
                     launchGame('math');
@@ -897,7 +1124,11 @@
             };
         }
 
-        function setupMemoryMatch(parent) {
+        async function setupMemoryMatch(parent) {
+            const game = games.find(g => g.id === 'match');
+            game.instructions = "Find matching pairs of emojis! Turn over two cards to check.";
+            await renderStartScreen(parent, game);
+
             const emojis = ['🚀', '🎉', '🌈', '🎁', '🚀', '🎉', '🌈', '🎁'];
             let flipped = [];
             parent.innerHTML = `<h3 class="text-2xl font-black">Memory 🧩</h3><div class="grid grid-cols-4 gap-4 w-full" id="mem-grid"></div>`;
@@ -910,7 +1141,7 @@
                     card.innerText = e; flipped.push(card);
                     if (flipped.length === 2) {
                         if (flipped[0].innerText === flipped[1].innerText) {
-                            score += 25; updateScore();
+                            updateScore(25);
                             sounds.playSuccess();
                             NotificationManager.show('Match found! ✨', 'success');
                             flipped = [];
@@ -925,7 +1156,10 @@
             });
         }
 
-        function setupPainter(parent) {
+        async function setupPainter(parent) {
+            const game = games.find(g => g.id === 'paint');
+            game.instructions = "Draw a neon masterpiece! Use tools and colors, then click DONE.";
+            await renderStartScreen(parent, game);
             parent.innerHTML = `
                 <h3 class="text-2xl font-black text-center mb-2">Neon Draw 🎨</h3>
                 <div class="flex gap-2 mb-4 justify-center flex-wrap max-w-sm mx-auto p-2 glass rounded-2xl">
@@ -1002,7 +1236,11 @@
             canvas.addEventListener('touchend', stopDraw);
         }
 
-        function setupFallingGame(parent, icon, title, speed) {
+        async function setupFallingGame(parent, icon, title, speed) {
+            const game = games.find(g => g.icon === icon);
+            game.instructions = `Catch the ${icon}! Avoid the 💣 or you'll lose points!`;
+            await renderStartScreen(parent, game);
+
             parent.innerHTML = `<h3 class="text-2xl font-black text-center mb-4">${title} ${icon}</h3><div id="game-area" class="h-[400px] relative bg-slate-900/5 rounded-3xl overflow-hidden shadow-inner cursor-pointer"></div>`;
             const area = document.getElementById('game-area');
             const duration = speed === 'slow' ? 4000 : 2500;
@@ -1030,7 +1268,7 @@
                         sounds.playError();
                         NotificationManager.show('Ouch! 💣', 'error');
                     } else {
-                        score += speed === 'slow' ? 10 : 20;
+                        updateScore(speed === 'slow' ? 10 : 20, true);
                         updateScore();
                         ignite(e.clientX, e.clientY);
                         sounds.playPop();
@@ -1040,7 +1278,10 @@
             }, interval);
         }
 
-        function setupRPS(parent) {
+        async function setupRPS(parent) {
+            const game = games.find(g => g.id === 'rps');
+            game.instructions = "Rock beats Scissors, Scissors beats Paper, Paper beats Rock!";
+            await renderStartScreen(parent, game);
             const items = ['✊', '✋', '✌️'];
             parent.innerHTML = `<h3 class="text-2xl font-black">Rock Paper Scissors</h3><div class="flex gap-4 justify-center">
                 ${items.map(i => `<button onclick="playRPS('${i}')" class="text-5xl glass p-6 hover:bg-blue-50">${i}</button>`).join('')}
@@ -1057,7 +1298,7 @@
             }
             else if ((user === '✊' && comp === '✌️') || (user === '✋' && comp === '✊') || (user === '✌️' && comp === '✋')) {
                 res = "You Win! 🎉";
-                score += 30; updateScore();
+                updateScore(30);
                 sounds.playSuccess();
                 NotificationManager.show('You won! 🏆', 'success');
             }
@@ -1069,7 +1310,11 @@
             document.getElementById('rps-res').innerText = `${user} vs ${comp} : ${res}`;
         };
 
-        function setupBubble(parent) {
+        async function setupBubble(parent) {
+            const game = games.find(g => g.id === 'bubble');
+            game.instructions = "Burst as many bubbles as you can! They expand and pop fast.";
+            await renderStartScreen(parent, game);
+
             parent.innerHTML = `<h3 class="text-2xl font-black">Bubble Burst! 🫧</h3><div id="game-area"></div>`;
             const area = document.getElementById('game-area');
             gameTimer = setInterval(() => {
@@ -1080,7 +1325,7 @@
                 area.appendChild(b);
                 b.animate([{ transform: 'scale(0)' }, { transform: 'scale(1.5)' }], { duration: 1500 }).onfinish = () => b.remove();
                 b.onclick = (e) => {
-                    score += 5; updateScore();
+                    updateScore(5, true);
                     ignite(e.clientX, e.clientY);
                     sounds.playPop();
                     b.remove();
@@ -1088,11 +1333,18 @@
             }, 500);
         }
 
-        function setupEnergyClicker(parent) {
-            parent.innerHTML = `<h3 class="text-2xl font-black">Charge 2026! ⚡</h3><div onclick="score+=2;updateScore();ignite(event.clientX, event.clientY)" class="w-40 h-40 bg-blue-600 rounded-full flex items-center justify-center text-6xl cursor-pointer hover:scale-110 active:scale-95 transition-all text-white shadow-2xl">⚡</div><p class="text-slate-400 font-bold">SMASH IT!</p>`;
+        async function setupEnergyClicker(parent) {
+            const game = games.find(g => g.id === 'click');
+            game.instructions = "SMASH the lightning bolt to charge up energy! Click as fast as you can.";
+            await renderStartScreen(parent, game);
+            parent.innerHTML = `<h3 class="text-2xl font-black">Charge 2026! ⚡</h3><div onclick="updateScore(2, true);ignite(event.clientX, event.clientY)" class="w-40 h-40 bg-blue-600 rounded-full flex items-center justify-center text-6xl cursor-pointer hover:scale-110 active:scale-95 transition-all text-white shadow-2xl">⚡</div><p class="text-slate-400 font-bold">SMASH IT!</p>`;
         }
 
-        function setupGift(parent) {
+        async function setupGift(parent) {
+            const game = games.find(g => g.id === 'gift');
+            game.instructions = "Only one of these boxes has a prize! Can you find it?";
+            await renderStartScreen(parent, game);
+
             parent.innerHTML = `<h3 class="text-2xl font-black text-center mb-4">Mystery Boxes 📦</h3>
                 <p class="text-[10px] opacity-40 text-center mb-8 uppercase font-black tracking-widest">Only one box has the prize!</p>
                 <div id="game-area" class="flex items-center justify-center gap-6 h-48">
@@ -1121,7 +1373,11 @@
             }
         };
 
-        function setupPiano(parent) {
+        async function setupPiano(parent) {
+            const game = games.find(g => g.id === 'music');
+            game.instructions = "Play the piano using keys A, S, D, F, G, H, J or click the tiles!";
+            await renderStartScreen(parent, game);
+
             const notes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
             const keys = ['A', 'S', 'D', 'F', 'G', 'H', 'J'];
             parent.innerHTML = `<h3 class="text-2xl font-black">Magic Piano 🎹</h3><p class="text-[10px] opacity-40 uppercase font-bold tracking-widest mb-4">Use keys: A S D F G H J</p><div class="flex h-40 gap-1 w-full" id="piano-keys">
@@ -1148,7 +1404,7 @@
         window.playNote = (el) => {
             const note = el.dataset.note;
             sounds.playNote(note);
-            score += 5; updateScore();
+            updateScore(5);
             const colors = { 'C': 'bg-red-200', 'D': 'bg-orange-200', 'E': 'bg-yellow-200', 'F': 'bg-green-200', 'G': 'bg-blue-200', 'A': 'bg-indigo-200', 'B': 'bg-purple-200' };
             el.classList.add(colors[note] || 'bg-blue-200');
             el.style.height = '140px';
@@ -1158,17 +1414,22 @@
             }, 300);
         };
 
-        function setupReaction(parent) {
-            parent.innerHTML = `<h3 class="text-2xl font-black text-center">Reaction! ⏱️</h3><div id="react-btn" onclick="hitReact()" class="w-full h-40 glass rounded-2xl flex items-center justify-center font-black text-3xl cursor-pointer">WAIT...</div>`;
+        async function setupReaction(parent) {
+            const game = games.find(g => g.id === 'reaction');
+            game.instructions = "WAIT... WAIT... CLICK when the screen turns RED! Test your reflexes.";
+            await renderStartScreen(parent, game);
+
+            parent.innerHTML = `<h3 class="text-2xl font-black">Reaction Test ⏱️</h3><div id="game-area" class="w-64 h-64 bg-slate-100 rounded-3xl flex items-center justify-center text-xl font-bold p-4 text-center cursor-pointer shadow-inner">Wait for Green...</div>`;
+            const btn = document.getElementById('game-area'); // Changed from react-btn to game-area
+            btn.onclick = () => hitReact(); // Added onclick handler
             setTimeout(() => {
-                const btn = document.getElementById('react-btn');
                 if (!btn) return;
                 btn.innerText = 'TAP NOW!'; btn.style.background = '#22c55e'; btn.style.color = 'white';
                 btn.dataset.time = Date.now();
             }, 1000 + Math.random() * 2000);
         }
         window.hitReact = () => {
-            const btn = document.getElementById('react-btn');
+            const btn = document.getElementById('game-area'); // Changed from react-btn to game-area
             if (btn.innerText === 'TAP NOW!') {
                 const ms = Date.now() - btn.dataset.time;
                 score += Math.max(0, 500 - ms); updateScore();
@@ -1181,12 +1442,16 @@
             }
         };
 
-        function setupRocket(parent) {
+        async function setupRocket(parent) {
+            const game = games.find(g => g.id === 'rocket');
+            game.instructions = "TAP the rocket as fast as you can to launch it into space! Fill the bar.";
+            await renderStartScreen(parent, game);
+
             parent.innerHTML = `<h3 class="text-2xl font-black">Rocket Fuel 🚀</h3><div class="w-full h-64 relative glass overflow-hidden"><div id="rocket-u" class="absolute bottom-4 left-1/2 -translate-x-1/2 text-5xl transition-all">🚀</div></div><button onclick="fuelRocket()" class="w-full py-4 bg-orange-500 text-white font-black rounded-xl shadow-lg mt-4">TAP TO FUEL!</button>`;
         }
         let fuel = 0;
         window.fuelRocket = () => {
-            fuel += 10; score += 2; updateScore();
+            fuel += 10; updateScore(2);
             sounds.playClick();
             const r = document.getElementById('rocket-u');
             r.style.bottom = fuel + 'px';
@@ -1199,7 +1464,11 @@
             }
         };
 
-        function setupShake(parent) {
+        async function setupShake(parent) {
+            const game = games.find(g => g.id === 'shake');
+            game.instructions = "SHAKE your mouse or move it rapidly to generate energy! Fill the bar.";
+            await renderStartScreen(parent, game);
+
             parent.innerHTML = `<h3 class="text-2xl font-black text-center mb-4">Shake Energy! 📱</h3>
                 <div id="phone" class="w-32 h-52 mx-auto glass rounded-[2rem] border-4 border-[var(--primary)] flex flex-col items-center p-4 relative mb-6 shadow-2xl overflow-hidden transition-transform duration-100">
                     <div class="w-12 h-1 bg-[var(--primary)]/20 rounded-full mb-8"></div>
@@ -1213,7 +1482,7 @@
             let charge = 0;
             window.doShake = () => {
                 charge += 5;
-                score += 1; updateScore();
+                updateScore(1);
                 sounds.playClick();
                 const phone = document.getElementById('phone');
                 const progress = document.getElementById('shake-progress');
@@ -1231,7 +1500,11 @@
             };
         }
 
-        function setupSimon(parent) {
+        async function setupSimon(parent) {
+            const game = games.find(g => g.id === 'simon');
+            game.instructions = "Watch the sequence and repeat it! The sequence gets longer each round.";
+            await renderStartScreen(parent, game);
+
             parent.innerHTML = `
                 <div class="text-center w-full max-w-md mx-auto">
                     <h3 class="text-3xl font-black mb-8">Simon Says 🔴</h3>
@@ -1241,9 +1514,9 @@
                         <div onclick="checkSimon(2)" class="h-40 bg-green-500 rounded-3xl cursor-pointer hover:scale-105 active:scale-95 transition-all shadow-[0_8px_0_rgb(21,128,61)] active:shadow-none active:translate-y-2"></div>
                         <div onclick="checkSimon(3)" class="h-40 bg-yellow-500 rounded-3xl cursor-pointer hover:scale-105 active:scale-95 transition-all shadow-[0_8px_0_rgb(161,98,7)] active:shadow-none active:translate-y-2"></div>
                     </div>
-                    <div id="simon-status" class="text-xl font-bold opacity-60 mb-6">Click START to test your memory!</div>
-                    <button onclick="startSimon()" id="simon-start" class="w-full py-6 bg-[var(--primary)] text-white font-black text-xl rounded-3xl shadow-xl hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-widest">START GAME</button>
+                    <div id="simon-status" class="text-xl font-bold opacity-60 mb-6">Memorize the pattern!</div>
                 </div>`;
+            startSimon(); // Auto-call internal start
         }
         let simonSeq = [];
         let simonInput = [];
@@ -1251,7 +1524,6 @@
 
         window.startSimon = () => {
             simonSeq = []; simonInput = []; simonPlaying = true;
-            document.getElementById('simon-start').classList.add('hidden');
             nextSimonRound();
         };
 
@@ -1294,18 +1566,23 @@
                 document.getElementById('simon-start').classList.remove('hidden');
                 document.getElementById('simon-start').innerText = "TRY AGAIN";
                 document.getElementById('simon-status').innerText = `Score: ${simonSeq.length - 1}`;
+                updateHighScore('simon', simonSeq.length - 1);
                 simonPlaying = false;
                 return;
             }
 
             if (simonInput.length === simonSeq.length) {
-                score += 50; updateScore();
+                updateScore(50);
                 sounds.playSuccess();
                 setTimeout(nextSimonRound, 1000);
             }
         };
 
-        function setupTicTacToe(parent) {
+        async function setupTicTacToe(parent) {
+            const game = games.find(g => g.id === 'ttt');
+            game.instructions = "Get three in a row to win! You are X, the AI is O.";
+            await renderStartScreen(parent, game);
+
             let board = ['', '', '', '', '', '', '', '', ''];
             let active = true;
             parent.innerHTML = `
@@ -1393,7 +1670,11 @@
             };
         }
 
-        function setupWhackAMole(parent) {
+        async function setupWhackAMole(parent) {
+            const game = games.find(g => g.id === 'mole');
+            game.instructions = "Whack as many moles as you can! Catch the gold ones for bonuses.";
+            await renderStartScreen(parent, game);
+
             let timeLeft = 20;
             let mScore = 0;
             parent.innerHTML = `
@@ -1416,6 +1697,7 @@
                 if (timeLeft <= 0) {
                     clearInterval(timer);
                     clearInterval(popper);
+                    updateHighScore('mole', mScore);
                     NotificationManager.show(`Final Score: ${mScore}`, 'info');
                     closeModal();
                 }
@@ -1433,7 +1715,7 @@
                 const mole = document.querySelectorAll('.mole')[i];
                 if (mole.classList.contains('translate-y-full')) return;
                 mScore++;
-                score += 5; updateScore();
+                updateScore(5, true);
                 sounds.playPop();
                 mole.innerText = '💥';
                 mole.classList.add('translate-y-full');
@@ -1445,38 +1727,82 @@
             window.closeModal = () => { clearInterval(timer); clearInterval(popper); window.closeModal = oldClose; oldClose(); };
         }
 
-        function setupSnake(parent) {
+        async function setupSnake(parent) {
+            const game = games.find(g => g.id === 'snake');
+            game.instructions = "Use Arrow Keys to move and eat glowing food! Don't hit walls or yourself.";
+            await renderStartScreen(parent, game);
+
             parent.innerHTML = `
-                <h3 class="text-2xl font-black text-center mb-4">Snake 🐍</h3>
-                <canvas id="snake-canvas" class="bg-slate-900 rounded-2xl mx-auto shadow-2xl" width="300" height="300"></canvas>
-                <div class="mt-4 text-center font-bold">Use ARROW KEYS to move</div>`;
+                <div class="w-full max-w-sm mx-auto p-4">
+                    <h3 class="text-2xl font-black text-center mb-4">Snake 🐍</h3>
+                    <canvas id="snake-canvas" class="bg-slate-900 rounded-2xl mx-auto shadow-2xl border-4 border-blue-500/20" width="300" height="300"></canvas>
+                    <div class="mt-4 flex justify-between items-center px-4">
+                        <div class="font-bold text-slate-400">SCORE: <span id="s-score" class="text-blue-500 font-black">0</span></div>
+                        <div class="text-[10px] uppercase font-black tracking-widest opacity-30">Arrows to Move</div>
+                    </div>
+                </div>`;
 
             const canvas = document.getElementById('snake-canvas');
             const ctx = canvas.getContext('2d');
             const box = 15;
             let snake = [{ x: 10 * box, y: 10 * box }];
-            let food = { x: Math.floor(Math.random() * 19 + 1) * box, y: Math.floor(Math.random() * 19 + 1) * box };
-            let dir;
+            let food = { x: Math.floor(Math.random() * 18 + 1) * box, y: Math.floor(Math.random() * 18 + 1) * box };
+            let dir = "RIGHT";
 
             const handleKey = (e) => {
-                if (e.keyCode == 37 && dir != "RIGHT") dir = "LEFT";
-                else if (e.keyCode == 38 && dir != "DOWN") dir = "UP";
-                else if (e.keyCode == 39 && dir != "LEFT") dir = "RIGHT";
-                else if (e.keyCode == 40 && dir != "UP") dir = "DOWN";
+                if (e.key === "ArrowLeft" && dir !== "RIGHT") dir = "LEFT";
+                else if (e.key === "ArrowUp" && dir !== "DOWN") dir = "UP";
+                else if (e.key === "ArrowRight" && dir !== "LEFT") dir = "RIGHT";
+                else if (e.key === "ArrowDown" && dir !== "UP") dir = "DOWN";
             };
             window.addEventListener("keydown", handleKey);
+            let snakeScore = 0;
 
             const draw = () => {
+                // Fixed speed interval
                 ctx.fillStyle = "#0f172a";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
                 for (let i = 0; i < snake.length; i++) {
-                    ctx.fillStyle = i == 0 ? "#3b82f6" : "#60a5fa";
-                    ctx.fillRect(snake[i].x, snake[i].y, box - 1, box - 1);
+                    const isHead = i === 0;
+                    ctx.fillStyle = isHead ? "#3b82f6" : `rgba(96, 165, 250, ${1 - (i / snake.length) * 0.5})`;
+
+                    // Draw rounded body
+                    const r = isHead ? 4 : 2;
+                    ctx.beginPath();
+                    ctx.roundRect(snake[i].x, snake[i].y, box - 1, box - 1, r);
+                    ctx.fill();
+
+                    if (isHead) {
+                        // Eyes
+                        ctx.fillStyle = "white";
+                        let eyeX1, eyeY1, eyeX2, eyeY2;
+                        if (dir === "RIGHT") { eyeX1 = 10; eyeY1 = 3; eyeX2 = 10; eyeY2 = 9; }
+                        else if (dir === "LEFT") { eyeX1 = 2; eyeY1 = 3; eyeX2 = 2; eyeY2 = 9; }
+                        else if (dir === "UP") { eyeX1 = 3; eyeY1 = 2; eyeX2 = 9; eyeY2 = 2; }
+                        else { eyeX1 = 3; eyeY1 = 10; eyeX2 = 9; eyeY2 = 10; }
+
+                        ctx.beginPath();
+                        ctx.arc(snake[i].x + eyeX1, snake[i].y + eyeY1, 2, 0, Math.PI * 2);
+                        ctx.arc(snake[i].x + eyeX2, snake[i].y + eyeY2, 2, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.fillStyle = "black";
+                        ctx.beginPath();
+                        ctx.arc(snake[i].x + eyeX1, snake[i].y + eyeY1, 1, 0, Math.PI * 2);
+                        ctx.arc(snake[i].x + eyeX2, snake[i].y + eyeY2, 1, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
                 }
 
+                // Glowing Food
+                const pulse = Math.sin(Date.now() / 200) * 2;
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = "#ef4444";
                 ctx.fillStyle = "#ef4444";
-                ctx.fillRect(food.x, food.y, box - 1, box - 1);
+                ctx.beginPath();
+                ctx.arc(food.x + box / 2, food.y + box / 2, (box / 2 - 2) + pulse, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
 
                 let headX = snake[0].x;
                 let headY = snake[0].y;
@@ -1487,9 +1813,11 @@
                 if (dir == "DOWN") headY += box;
 
                 if (headX == food.x && headY == food.y) {
-                    score += 10; updateScore();
+                    snakeScore++;
+                    updateScore(10, true);
                     sounds.playSuccess();
-                    food = { x: Math.floor(Math.random() * 19 + 1) * box, y: Math.floor(Math.random() * 19 + 1) * box };
+                    document.getElementById('s-score').innerText = snakeScore;
+                    food = { x: Math.floor(Math.random() * 18 + 1) * box, y: Math.floor(Math.random() * 18 + 1) * box };
                 } else {
                     snake.pop();
                 }
@@ -1497,11 +1825,12 @@
                 let newHead = { x: headX, y: headY };
 
                 if (headX < 0 || headX >= canvas.width || headY < 0 || headY >= canvas.height || collision(newHead, snake)) {
-                    clearInterval(gameLoop);
+                    if (gameTimer) clearInterval(gameTimer);
                     window.removeEventListener("keydown", handleKey);
                     sounds.playError();
-                    NotificationManager.show(`Game Over! Score: ${snake.length}`, 'error');
-                    setTimeout(() => launchGame('snake'), 1000);
+                    updateHighScore('snake', snakeScore);
+                    NotificationManager.show(`Game Over! Score: ${snakeScore}`, 'error');
+                    setTimeout(() => launchGame('snake'), 1500);
                 }
 
                 snake.unshift(newHead);
@@ -1514,16 +1843,25 @@
                 return false;
             };
 
-            let gameLoop = setInterval(draw, 100);
-
+            gameTimer = setInterval(draw, 150);
             const oldClose = closeModal;
-            window.closeModal = () => { clearInterval(gameLoop); window.removeEventListener("keydown", handleKey); window.closeModal = oldClose; oldClose(); };
+            window.closeModal = () => { clearInterval(gameTimer); window.removeEventListener("keydown", handleKey); window.closeModal = oldClose; oldClose(); };
         }
 
-        function setupPong(parent) {
+        async function setupPong(parent) {
+            const game = games.find(g => g.id === 'pong');
+            game.instructions = "Move your mouse to control the paddle. Don't let the ball pass!";
+            await renderStartScreen(parent, game);
+
             parent.innerHTML = `
-                <h3 class="text-2xl font-black text-center mb-4">Ping Pong 🏓</h3>
-                <canvas id="pong-canvas" class="bg-slate-900 rounded-2xl mx-auto shadow-2xl" width="400" height="300"></canvas>
+                <div class="w-full max-w-lg mx-auto p-4">
+                    <h3 class="text-2xl font-black text-center mb-4 text-emerald-400">Ping Pong 🏓</h3>
+                    <canvas id="pong-canvas" class="bg-slate-900 rounded-2xl mx-auto shadow-2xl border-4 border-emerald-500/20" width="400" height="300"></canvas>
+                    <div class="mt-4 flex justify-between font-black text-xl text-emerald-500 px-4">
+                        <div id="p-score">0</div>
+                        <div id="ai-score">0</div>
+                    </div>
+                </div>
                 <p class="mt-4 text-center font-bold">Use Mouse/Touch to move paddle</p>`;
 
             const canvas = document.getElementById('pong-canvas');
@@ -1532,6 +1870,9 @@
             let ball = { x: 200, y: 150, dx: 4, dy: 4, radius: 8 };
             let paddle = { y: 120, width: 10, height: 60 };
             let aiPaddle = { y: 120, width: 10, height: 60 };
+            let trail = [];
+            let pScore = 0;
+            let aiScore = 0;
 
             canvas.onmousemove = (e) => {
                 const rect = canvas.getBoundingClientRect();
@@ -1542,15 +1883,39 @@
                 ctx.fillStyle = "#0f172a";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                // Ball
+                // Ball Trail
+                trail.push({ x: ball.x, y: ball.y });
+                if (trail.length > 8) trail.shift();
+                trail.forEach((t, i) => {
+                    ctx.fillStyle = `rgba(255, 255, 255, ${i / 10})`;
+                    ctx.beginPath();
+                    ctx.arc(t.x, t.y, ball.radius * (i / 8), 0, Math.PI * 2);
+                    ctx.fill();
+                });
+
+                // Ball with glow
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = "white";
                 ctx.fillStyle = "#ffffff";
                 ctx.beginPath();
                 ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
                 ctx.fill();
+                ctx.shadowBlur = 0;
 
-                // Paddles
-                ctx.fillStyle = "#3b82f6"; ctx.fillRect(0, paddle.y, paddle.width, paddle.height);
-                ctx.fillStyle = "#ef4444"; ctx.fillRect(canvas.width - aiPaddle.width, aiPaddle.y, aiPaddle.width, aiPaddle.height);
+                // Paddles with Neon Glow
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = "#3b82f6";
+                ctx.fillStyle = "#3b82f6";
+                ctx.beginPath();
+                ctx.roundRect(0, paddle.y, paddle.width, paddle.height, [0, 5, 5, 0]);
+                ctx.fill();
+
+                ctx.shadowColor = "#ef4444";
+                ctx.fillStyle = "#ef4444";
+                ctx.beginPath();
+                ctx.roundRect(canvas.width - aiPaddle.width, aiPaddle.y, aiPaddle.width, aiPaddle.height, [5, 0, 0, 5]);
+                ctx.fill();
+                ctx.shadowBlur = 0;
 
                 ball.x += ball.dx;
                 ball.y += ball.dy;
@@ -1570,25 +1935,40 @@
                 }
 
                 if (ball.x < 0) {
-                    clearInterval(game); sounds.playError();
+                    aiScore++;
+                    document.getElementById('ai-score').innerText = aiScore;
+                    sounds.playError();
                     NotificationManager.show('AI Scored! 🤖', 'error');
-                    setTimeout(() => launchGame('pong'), 1000);
+                    ball = { x: 200, y: 150, dx: 4, dy: 4, radius: 8 }; // Reset ball
                 }
                 if (ball.x > canvas.width) {
-                    clearInterval(game); sounds.playSuccess(); score += 50; updateScore();
+                    pScore++;
+                    document.getElementById('p-score').innerText = pScore;
+                    sounds.playSuccess(); updateScore(50);
                     NotificationManager.show('You Scored! 🎉', 'success');
-                    setTimeout(() => launchGame('pong'), 1000);
+                    ball = { x: 200, y: 150, dx: 4, dy: 4, radius: 8 }; // Reset ball
                 }
             };
-            let game = setInterval(draw, 1000 / 60);
+            let gameLoop = setInterval(draw, 1000 / 60);
             const oldClose = closeModal;
-            window.closeModal = () => { clearInterval(game); window.closeModal = oldClose; oldClose(); };
+            window.closeModal = () => { clearInterval(gameLoop); window.closeModal = oldClose; oldClose(); };
         }
 
-        function setupBreakout(parent) {
+        async function setupBreakout(parent) {
+            const game = games.find(g => g.id === 'break');
+            game.instructions = "Use your paddle to bounce the ball and break all the bricks!";
+            await renderStartScreen(parent, game);
+
+            const canvasWidth = 360;
             parent.innerHTML = `
-                <h3 class="text-2xl font-black text-center mb-4">Breakout 🧱</h3>
-                <canvas id="breakout-canvas" class="bg-slate-900 rounded-2xl mx-auto shadow-2xl" width="400" height="300"></canvas>`;
+                <div class="w-full max-w-sm mx-auto p-4">
+                    <h3 class="text-2xl font-black text-center mb-4">Breakout 🧱</h3>
+                    <canvas id="breakout-canvas" class="bg-slate-900 rounded-2xl mx-auto shadow-2xl" width="400" height="300"></canvas>
+                    <div class="mt-4 flex justify-between items-center px-4">
+                        <div class="font-bold text-slate-400">SCORE: <span id="b-score" class="text-blue-500 font-black">0</span></div>
+                        <div class="text-[10px] uppercase font-black tracking-widest opacity-30">Mouse to Move</div>
+                    </div>
+                </div>`;
 
             const canvas = document.getElementById('breakout-canvas');
             const ctx = canvas.getContext('2d');
@@ -1596,6 +1976,7 @@
             let ball = { x: 200, y: 250, dx: 3, dy: -3, radius: 7 };
             let paddle = { x: 150, width: 80, height: 10 };
             let bricks = [];
+            let bScore = 0;
             for (let r = 0; r < 4; r++) for (let c = 0; c < 7; c++) bricks.push({ x: c * 55 + 10, y: r * 25 + 40, active: true });
 
             canvas.onmousemove = (e) => {
@@ -1611,15 +1992,30 @@
                 ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2); ctx.fill();
 
                 ctx.fillStyle = "#3b82f6";
-                ctx.fillRect(paddle.x, canvas.height - paddle.height - 10, paddle.width, paddle.height);
+                ctx.beginPath();
+                ctx.roundRect(paddle.x, canvas.height - paddle.height - 10, paddle.width, paddle.height, 5);
+                ctx.fill();
 
                 bricks.forEach(b => {
                     if (b.active) {
-                        ctx.fillStyle = "#fbbf24";
-                        ctx.fillRect(b.x, b.y, 50, 20);
+                        // Glossy Brick
+                        const grad = ctx.createLinearGradient(b.x, b.y, b.x, b.y + 20);
+                        grad.addColorStop(0, "#fbbf24");
+                        grad.addColorStop(1, "#d97706");
+                        ctx.fillStyle = grad;
+                        ctx.beginPath();
+                        ctx.roundRect(b.x, b.y, 50, 20, 4);
+                        ctx.fill();
+                        // Reflection
+                        ctx.fillStyle = "rgba(255,255,255,0.3)";
+                        ctx.fillRect(b.x + 5, b.y + 3, 40, 2);
+
                         if (ball.x > b.x && ball.x < b.x + 50 && ball.y > b.y && ball.y < b.y + 20) {
                             ball.dy *= -1; b.active = false;
-                            score += 10; updateScore(); sounds.playPop();
+                            bScore += 10;
+                            document.getElementById('b-score').innerText = bScore;
+                            updateScore(10); sounds.playPop();
+                            ignite(ball.x, ball.y); // Brick break effect
                         }
                     }
                 });
@@ -1634,21 +2030,27 @@
 
                 if (ball.y > canvas.height) {
                     clearInterval(game); sounds.playError();
+                    updateHighScore('break', bScore);
                     NotificationManager.show('Game Over! 💔', 'error');
-                    setTimeout(() => launchGame('break'), 1000);
+                    setTimeout(() => launchGame('break'), 1500);
                 }
                 if (bricks.every(b => !b.active)) {
                     clearInterval(game); sounds.playSuccess(); igniteSpread();
+                    updateHighScore('break', bScore);
                     NotificationManager.show('Level Cleared! 🏆', 'success');
-                    setTimeout(() => launchGame('break'), 1000);
+                    setTimeout(() => launchGame('break'), 1500);
                 }
             };
-            let game = setInterval(draw, 1000 / 60);
+            let gameLoop = setInterval(draw, 1000 / 60);
             const oldClose = closeModal;
-            window.closeModal = () => { clearInterval(game); window.closeModal = oldClose; oldClose(); };
+            window.closeModal = () => { clearInterval(gameLoop); window.closeModal = oldClose; oldClose(); };
         }
 
-        function setupHangman(parent) {
+        async function setupHangman(parent) {
+            const game = games.find(g => g.id === 'hang');
+            game.instructions = "Guess the word letter by letter before the hangman is complete!";
+            await renderStartScreen(parent, game);
+
             const words = ['APPLE', 'BANANA', 'KITTEN', 'HAPPY', 'CANDY', 'ROBOT', 'PIZZA', 'MAGIC'];
             let word = words[Math.floor(Math.random() * words.length)];
             let guessed = [];
@@ -1714,7 +2116,11 @@
             updateUI();
         }
 
-        function setupQuiz(parent) {
+        async function setupQuiz(parent) {
+            const game = games.find(g => g.id === 'quiz');
+            game.instructions = "Answer the questions correctly to earn points!";
+            await renderStartScreen(parent, game);
+
             const qs = [
                 { q: "What color is an apple?", a: ["Red", "Blue", "Black", "Purple"], c: 0 },
                 { q: "How many legs does a dog have?", a: ["2", "3", "4", "5"], c: 2 },
@@ -1803,7 +2209,11 @@
             nextQ();
         }
 
-        function setupSlidePuzzle(parent) {
+        async function setupSlidePuzzle(parent) {
+            const game = games.find(g => g.id === 'slide');
+            game.instructions = "Rearrange the tiles to form the correct sequence (1-8).";
+            await renderStartScreen(parent, game);
+
             let tiles = [1, 2, 3, 4, 5, 6, 7, 8, null];
             const shuffle = () => {
                 for (let i = 0; i < 100; i++) {
@@ -1839,7 +2249,8 @@
                     sounds.playClick();
                     drawBoard();
                     if (tiles.slice(0, 8).every((t, idx) => t === idx + 1)) {
-                        score += 200; updateScore(); sounds.playSuccess(); igniteSpread();
+                        updateScore(200); sounds.playSuccess(); igniteSpread();
+                        updateHighScore('slide', 1);
                         NotificationManager.show('Puzzle Solved! 🧩', 'success');
                         setTimeout(() => launchGame('slide'), 1500);
                     }
@@ -1848,7 +2259,11 @@
             drawBoard();
         }
 
-        function setupConnectFour(parent) {
+        async function setupConnectFour(parent) {
+            const game = games.find(g => g.id === 'c4');
+            game.instructions = "Drop your colored discs to get four in a row!";
+            await renderStartScreen(parent, game);
+
             let board = Array(6).fill().map(() => Array(7).fill(null));
             let curPlayer = 'Y'; // Yellow vs Red
 
@@ -1874,7 +2289,8 @@
                         sounds.playClick();
                         if (checkC4Win(r, c)) {
                             drawBoard();
-                            score += 150; updateScore(); sounds.playSuccess(); igniteSpread();
+                            updateScore(150); sounds.playSuccess(); igniteSpread();
+                            updateHighScore('c4', 1);
                             NotificationManager.show(`${curPlayer === 'Y' ? 'Yellow' : 'Red'} Wins! 🏆`, 'success');
                             setTimeout(() => launchGame('c4'), 1500);
                             return;
@@ -1891,19 +2307,27 @@
                 const dirs = [[0, 1], [1, 0], [1, 1], [1, -1]];
                 return dirs.some(([dr, dc]) => {
                     let count = 1;
-                    [[1, 1], [-1, -1]].forEach(([sign, _]) => {
-                        let nr = r + dr * sign, nc = c + dc * sign;
-                        while (nr >= 0 && nr < 6 && nc >= 0 && nc < 7 && board[nr][nc] === player) {
-                            count++; nr += dr * sign; nc += dc * sign;
-                        }
-                    });
+                    // Check in one direction
+                    let nr = r + dr, nc = c + dc;
+                    while (nr >= 0 && nr < 6 && nc >= 0 && nc < 7 && board[nr][nc] === player) {
+                        count++; nr += dr; nc += dc;
+                    }
+                    // Check in the opposite direction
+                    nr = r - dr; nc = c - dc;
+                    while (nr >= 0 && nr < 6 && nc >= 0 && nc < 7 && board[nr][nc] === player) {
+                        count++; nr -= dr; nc -= dc;
+                    }
                     return count >= 4;
                 });
             };
             drawBoard();
         }
 
-        function setupMinesweeper(parent) {
+        async function setupMinesweeper(parent) {
+            const game = games.find(g => g.id === 'mine');
+            game.instructions = "Click to reveal squares, right-click to flag mines. Don't click on a mine!";
+            await renderStartScreen(parent, game);
+
             const size = 10, mines = 15;
             let board = Array(size).fill().map(() => Array(size).fill(0));
             let revealed = Array(size).fill().map(() => Array(size).fill(false));
@@ -1987,7 +2411,8 @@
                     }
                     const revealedCount = revealed.flat().filter(rev => rev).length;
                     if (revealedCount === size * size - mines) {
-                        score += 500; updateScore(); sounds.playSuccess(); igniteSpread();
+                        updateScore(500); sounds.playSuccess(); igniteSpread();
+                        updateHighScore('mine', 1);
                         NotificationManager.show('Clear! 🏆', 'success');
                         mineLocs.forEach(([mr, mc]) => flagged[mr][mc] = true);
                         draw();
@@ -1999,7 +2424,11 @@
             draw();
         }
 
-        function setupFlappyBird(parent) {
+        async function setupFlappyBird(parent) {
+            const game = games.find(g => g.id === 'flap');
+            game.instructions = "Click or press space to make the bird fly and avoid pipes!";
+            await renderStartScreen(parent, game);
+
             parent.innerHTML = `
                 <h3 class="text-2xl font-black text-center mb-4">Flappy Clone 🐦</h3>
                 <div class="relative mx-auto" style="width: 320px;">
@@ -2084,28 +2513,34 @@
                     }
 
                     if ((50 + bird.r > p.x && 50 - bird.r < p.x + 45) && (bird.y - bird.r < p.h || bird.y + bird.r > p.h + 110)) {
-                        clearInterval(game); sounds.playError(); NotificationManager.show(`Game Over! Score: ${fScore}`, 'error');
+                        clearInterval(gameInterval); sounds.playError();
+                        updateHighScore('flap', fScore);
+                        NotificationManager.show(`Game Over! Score: ${fScore}`, 'error');
                         setTimeout(() => launchGame('flap'), 1500);
                     }
                 });
                 pipes = pipes.filter(p => p.x > -50);
                 if (bird.y > 410 || bird.y < -10) {
-                    clearInterval(game); sounds.playError();
+                    clearInterval(gameInterval); sounds.playError();
                     NotificationManager.show(`Fell out! Score: ${fScore}`, 'error');
                     setTimeout(() => launchGame('flap'), 1500);
                 }
             };
-            let game = setInterval(draw, 1000 / 60);
+            let gameInterval = setInterval(draw, 1000 / 60);
             const oldClose = closeModal;
             window.closeModal = () => {
-                clearInterval(game);
+                clearInterval(gameInterval);
                 window.removeEventListener('keydown', handleKey);
                 window.closeModal = oldClose;
                 oldClose();
             };
         }
 
-        function setupSpaceInvaders(parent) {
+        async function setupSpaceInvaders(parent) {
+            const game = games.find(g => g.id === 'space');
+            game.instructions = "Use arrow keys or WASD to move, space to shoot invaders!";
+            await renderStartScreen(parent, game);
+
             parent.innerHTML = `
                 <h3 class="text-2xl font-black text-center mb-4">Space War 👾</h3>
                 <canvas id="space-canvas" class="bg-slate-900 rounded-2xl mx-auto shadow-2xl" width="400" height="300"></canvas>
@@ -2131,6 +2566,12 @@
             const draw = () => {
                 ctx.fillStyle = "#0f172a"; ctx.fillRect(0, 0, 400, 300);
 
+                // CRT Scanlines Effect
+                ctx.fillStyle = "rgba(18, 16, 16, 0.1)";
+                for (let i = 0; i < 300; i += 4) {
+                    ctx.fillRect(0, i, 400, 2);
+                }
+
                 // Movement
                 if (keys['ArrowLeft'] || keys['a'] || keys['A']) ship.x -= 4;
                 if (keys['ArrowRight'] || keys['d'] || keys['D']) ship.x += 4;
@@ -2143,21 +2584,25 @@
                     }
                 }
 
-                // Ship
+                // Ship (Retro Style)
                 ctx.fillStyle = "#3b82f6";
-                ctx.beginPath();
-                ctx.moveTo(ship.x + 20, ship.y);
-                ctx.lineTo(ship.x + ship.w, ship.y + ship.h);
-                ctx.lineTo(ship.x, ship.y + ship.h);
-                ctx.fill();
+                ctx.fillRect(ship.x + 15, ship.y - 5, 10, 5); // top
+                ctx.fillRect(ship.x, ship.y, 40, 10); // middle
+                ctx.fillRect(ship.x + 5, ship.y + 10, 30, 10); // bottom
+                ctx.fillStyle = "#60a5fa";
+                ctx.fillRect(ship.x + 18, ship.y - 2, 4, 4); // window
 
                 bullets.forEach((b, bi) => {
                     b.y -= 7;
                     ctx.fillStyle = "#22d3ee";
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = "#22d3ee";
                     ctx.fillRect(b.x - 2, b.y, 4, 12);
+                    ctx.shadowBlur = 0;
                     invaders.forEach(inv => {
                         if (inv.active && b.x > inv.x && b.x < inv.x + 30 && b.y > inv.y && b.y < inv.y + 20) {
                             inv.active = false; b.y = -100; sScore += 20;
+                            updateScore(20);
                             document.getElementById('space-score').innerText = sScore;
                             ignite(inv.x + 15, inv.y + 10);
                             sounds.playPop();
@@ -2178,15 +2623,21 @@
                 invaders.forEach(inv => {
                     if (inv.active) {
                         ctx.fillStyle = "#22c55e";
-                        ctx.fillRect(inv.x, inv.y, 30, 20);
-                        // Eyes for invaders
+                        // Pixel Alien Sprite
+                        ctx.fillRect(inv.x + 5, inv.y, 20, 5); // head
+                        ctx.fillRect(inv.x, inv.y + 5, 30, 5); // body
+                        ctx.fillRect(inv.x + 5, inv.y + 10, 20, 5); // feet
+                        ctx.fillRect(inv.x + 10, inv.y + 15, 10, 5); // bottom
+
+                        // Eyes
                         ctx.fillStyle = "black";
-                        ctx.fillRect(inv.x + 5, inv.y + 5, 4, 4);
-                        ctx.fillRect(inv.x + 21, inv.y + 5, 4, 4);
+                        ctx.fillRect(inv.x + 8, inv.y + 5, 4, 4);
+                        ctx.fillRect(inv.x + 18, inv.y + 5, 4, 4);
 
                         if (inv.y > 250) {
-                            clearInterval(game); sounds.playError();
-                            NotificationManager.show('Invaded! 💀', 'error');
+                            clearInterval(gameInterval); sounds.playError();
+                            updateHighScore('space', sScore);
+                            NotificationManager.show(`Invaded! Score: ${sScore}`, 'error');
                             setTimeout(() => launchGame('space'), 1500);
                         }
                     }
@@ -2201,10 +2652,10 @@
                     bullets = [];
                 }
             };
-            let game = setInterval(draw, 1000 / 60);
+            let gameInterval = setInterval(draw, 1000 / 60);
             const oldClose = closeModal;
             window.closeModal = () => {
-                clearInterval(game);
+                clearInterval(gameInterval);
                 window.onkeydown = null;
                 window.onkeyup = null;
                 window.closeModal = oldClose;
@@ -2212,7 +2663,11 @@
             };
         }
 
-        function setupTetris(parent) {
+        async function setupTetris(parent) {
+            const game = games.find(g => g.id === 'tetris');
+            game.instructions = "Use arrow keys to move and rotate falling blocks to clear lines!";
+            await renderStartScreen(parent, game);
+
             parent.innerHTML = `
                 <h3 class="text-2xl font-black text-center mb-4">Tetris 🏗️</h3>
                 <canvas id="tetris-canvas" class="bg-slate-800 rounded-xl mx-auto shadow-2xl" width="200" height="360"></canvas>
@@ -2241,6 +2696,18 @@
                         drawBlock(c, r, colors[v - 1]);
                     }
                 }));
+                // Ghost Piece
+                let ghostY = curPos.y;
+                while (!collide(curPos.x, ghostY + 1, curShape)) ghostY++;
+                curShape.forEach((row, r) => row.forEach((v, c) => {
+                    if (v) {
+                        ctx.fillStyle = "rgba(255,255,255,0.1)";
+                        ctx.fillRect((curPos.x + c) * B, (ghostY + r) * B, B - 1, B - 1);
+                        ctx.strokeStyle = "rgba(255,255,255,0.2)";
+                        ctx.strokeRect((curPos.x + c) * B, (ghostY + r) * B, B - 1, B - 1);
+                    }
+                }));
+
                 // Current Shape
                 curShape.forEach((row, r) => row.forEach((v, c) => {
                     if (v) {
@@ -2272,10 +2739,12 @@
                 while (board.length < 18) board.unshift(Array(10).fill(0));
 
                 if (linesClearing > 0) {
-                    score += [0, 100, 300, 500, 800][linesClearing];
-                    updateScore();
+                    updateScore([0, 100, 300, 500, 800][linesClearing]);
                     sounds.playSuccess();
-                    igniteSpread();
+                    // Explode particles at cleared lines
+                    for (let i = 0; i < linesClearing * 10; i++) {
+                        ignite(Math.random() * W, Math.random() * H);
+                    }
                 } else {
                     sounds.playPop();
                 }
@@ -2284,7 +2753,8 @@
                 curIdx = Math.floor(Math.random() * shapes.length);
                 curShape = shapes[curIdx];
                 if (collide(curPos.x, curPos.y, curShape)) {
-                    clearInterval(game); sounds.playError();
+                    clearInterval(gameInterval); sounds.playError();
+                    updateHighScore('tetris', score);
                     NotificationManager.show('Tower Fell! 🏗️', 'error');
                     setTimeout(() => launchGame('tetris'), 1500);
                 }
@@ -2305,14 +2775,1448 @@
             };
             window.addEventListener('keydown', handleKey);
 
-            let game = setInterval(() => { if (!collide(curPos.x, curPos.y + 1, curShape)) curPos.y++; else merge(); draw(); }, 600);
+            let gameInterval = setInterval(() => { if (!collide(curPos.x, curPos.y + 1, curShape)) curPos.y++; else merge(); draw(); }, 600);
             const oldClose = closeModal;
             window.closeModal = () => {
-                clearInterval(game);
+                clearInterval(gameInterval);
                 window.removeEventListener('keydown', handleKey);
                 window.closeModal = oldClose;
                 oldClose();
             };
+        }
+        async function setup2048(parent) {
+            const game = games.find(g => g.id === '2048');
+            game.instructions = "Swipe or use arrow keys to merge tiles and reach 2048!";
+            await renderStartScreen(parent, game);
+
+            parent.innerHTML = `
+                <div class="text-center w-full max-w-sm mx-auto p-4">
+                    <h3 class="text-3xl font-black mb-6">2048 Classic 🔢</h3>
+                    <div id="grid-2048" class="grid grid-cols-4 gap-3 bg-slate-800/50 p-3 rounded-2xl shadow-2xl mx-auto border border-white/10" style="width: 280px; height: 280px;">
+                        ${Array(16).fill().map(() => `<div class="cell-2048 w-full h-full bg-white/5 rounded-xl border border-white/5 flex items-center justify-center text-xl font-black transition-all duration-100"></div>`).join('')}
+                    </div>
+                    <div class="mt-6 flex justify-between items-center px-4 font-bold">
+                        <div class="opacity-50 uppercase tracking-widest text-[10px]">Score</div>
+                        <div id="score-2048" class="text-2xl text-[var(--primary)]">0</div>
+                    </div>
+                    <p class="mt-4 opacity-30 text-[10px] font-bold uppercase tracking-widest">Swipe or use Arrow Keys to Merge!</p>
+                </div>`;
+
+            let grid = Array(4).fill().map(() => Array(4).fill(0));
+            let s2048 = 0;
+
+            const addTile = () => {
+                let empty = [];
+                grid.forEach((r, i) => r.forEach((v, j) => { if (!v) empty.push([i, j]); }));
+                if (empty.length) {
+                    let [r, c] = empty[Math.floor(Math.random() * empty.length)];
+                    grid[r][c] = Math.random() < 0.9 ? 2 : 4;
+                }
+            };
+
+            const draw = () => {
+                const cells = document.querySelectorAll('.cell-2048');
+                grid.flat().forEach((v, i) => {
+                    cells[i].innerText = v || '';
+                    cells[i].className = 'cell-2048 w-full h-full rounded-xl border flex items-center justify-center text-xl font-black transition-all duration-100 ' +
+                        (v ? `bg-gradient-to-br ${get2048Color(v)} text-white border-white/20 shadow-lg scale-100` : 'bg-white/5 border-white/5 opacity-50 scale-90');
+                });
+                document.getElementById('score-2048').innerText = s2048;
+            };
+
+            const get2048Color = (v) => {
+                const colors = {
+                    2: 'from-blue-400 to-blue-500', 4: 'from-cyan-400 to-cyan-500', 8: 'from-teal-400 to-teal-500',
+                    16: 'from-green-400 to-green-500', 32: 'from-emerald-400 to-emerald-500', 64: 'from-amber-400 to-amber-500',
+                    128: 'from-orange-400 to-orange-500', 256: 'from-rose-400 to-rose-500', 512: 'from-pink-400 to-pink-500',
+                    1024: 'from-purple-400 to-purple-500', 2048: 'from-indigo-500 to-violet-600'
+                };
+                return colors[v] || 'from-slate-700 to-slate-900';
+            };
+
+            const move = (dir) => {
+                let moved = false;
+                const rotate = (g) => g[0].map((_, i) => g.map(r => r[i]).reverse());
+                const slide = (row) => {
+                    let filtered = row.filter(v => v);
+                    for (let i = 0; i < filtered.length - 1; i++) {
+                        if (filtered[i] === filtered[i + 1]) {
+                            filtered[i] *= 2; s2048 += filtered[i]; updateScore(filtered[i] / 10);
+                            filtered.splice(i + 1, 1); moved = true;
+                            sounds.playPop();
+                        }
+                    }
+                    while (filtered.length < 4) filtered.push(0);
+                    return filtered;
+                };
+
+                let rotCount = { 'LEFT': 0, 'DOWN': 1, 'RIGHT': 2, 'UP': 3 }[dir];
+                for (let i = 0; i < rotCount; i++) grid = rotate(grid);
+                grid = grid.map(row => {
+                    let newRow = slide(row);
+                    if (JSON.stringify(newRow) !== JSON.stringify(row)) moved = true;
+                    return newRow;
+                });
+                for (let i = 0; i < (4 - rotCount) % 4; i++) grid = rotate(grid);
+
+                if (moved) {
+                    addTile(); draw();
+                    if (isGameOver()) {
+                        updateHighScore('2048', s2048);
+                        NotificationManager.show(`Game Over! Final Score: ${s2048}`, 'error');
+                    }
+                }
+            };
+
+            const isGameOver = () => {
+                if (grid.flat().includes(0)) return false;
+                for (let r = 0; r < 4; r++) for (let c = 0; c < 3; c++) if (grid[r][c] === grid[r][c + 1]) return false;
+                for (let r = 0; r < 3; r++) for (let c = 0; c < 4; c++) if (grid[r][c] === grid[r + 1][c]) return false;
+                return true;
+            };
+
+            const handleKey = (e) => {
+                if (e.key === 'ArrowUp') move('UP');
+                if (e.key === 'ArrowDown') move('DOWN');
+                if (e.key === 'ArrowLeft') move('LEFT');
+                if (e.key === 'ArrowRight') move('RIGHT');
+            };
+
+            addTile(); addTile(); draw();
+            window.addEventListener('keydown', handleKey);
+
+            const oldClose = closeModal;
+            window.closeModal = () => {
+                window.removeEventListener('keydown', handleKey);
+                window.closeModal = oldClose;
+                oldClose();
+            };
+        }
+
+        async function setupWordle(parent) {
+            const game = games.find(g => g.id === 'wordle');
+            game.instructions = "Guess the 5-letter word in 6 tries. Green means correct letter, correct spot. Yellow means correct letter, wrong spot.";
+            await renderStartScreen(parent, game);
+
+            const words = ['TWENT', 'SIXER', 'HAPPY', 'YEARS', 'WISHY', 'PARTY', 'START', 'FRESH', 'NOVEL', 'CHEER'];
+            const target = words[Math.floor(Math.random() * words.length)];
+            let attempts = 0, current = '', gameOver = false;
+
+            parent.innerHTML = `
+                <div class="text-center w-full max-w-sm mx-auto p-4">
+                    <h3 class="text-3xl font-black mb-6">Wordle 2026 🔠</h3>
+                    <div id="wordle-grid" class="grid grid-rows-6 gap-2 mb-6">
+                        ${Array(6).fill().map(() => `<div class="grid grid-cols-5 gap-2 h-12">
+                            ${Array(5).fill().map(() => `<div class="wordle-cell glass rounded-lg border border-white/10 flex items-center justify-center text-xl font-black uppercase"></div>`).join('')}
+                        </div>`).join('')}
+                    </div>
+                    <div id="wordle-keyboard" class="grid grid-cols-7 gap-1 px-2">
+                        ${'QWERTYUIOPASDFGHJKLZXCVBNM'.split('').map(l => `<button onclick="typeWordle('${l}')" class="p-2 bg-white/10 hover:bg-white/20 rounded font-bold text-xs shadow-lg transform active:scale-90 transition-all">${l}</button>`).join('')}
+                        <button onclick="typeWordle('BACK')" class="col-span-2 p-2 bg-red-500/20 hover:bg-red-500/40 rounded font-bold text-xs">BACK</button>
+                        <button onclick="typeWordle('ENTER')" class="col-span-2 p-2 bg-green-500/20 hover:bg-green-500/40 rounded font-bold text-xs">ENTER</button>
+                    </div>
+                </div>`;
+
+            window.typeWordle = (key) => {
+                if (gameOver) return;
+                const cells = document.querySelectorAll('#wordle-grid .wordle-cell');
+                if (key === 'BACK') {
+                    if (current.length > 0) {
+                        cells[attempts * 5 + current.length - 1].innerText = '';
+                        current = current.slice(0, -1);
+                        sounds.playClick();
+                    }
+                } else if (key === 'ENTER') {
+                    if (current.length === 5) checkWordle();
+                    else NotificationManager.show("Too short!", "warning");
+                } else if (current.length < 5) {
+                    cells[attempts * 5 + current.length].innerText = key;
+                    current += key;
+                    sounds.playClick();
+                }
+            };
+
+            const checkWordle = () => {
+                const cells = document.querySelectorAll('#wordle-grid .wordle-cell');
+                const rowCells = Array.from(cells).slice(attempts * 5, attempts * 5 + 5);
+                let checkTarget = target.split('');
+                let rowGuess = current.split('');
+
+                rowGuess.forEach((l, i) => {
+                    if (l === target[i]) {
+                        rowCells[i].className = 'wordle-cell rounded-lg border flex items-center justify-center text-xl font-black uppercase bg-green-500 border-green-600 shadow-lg scale-110 transition-all';
+                        checkTarget[i] = null; rowGuess[i] = null;
+                    }
+                });
+                rowGuess.forEach((l, i) => {
+                    if (l && checkTarget.includes(l)) {
+                        rowCells[i].className = 'wordle-cell rounded-lg border flex items-center justify-center text-xl font-black uppercase bg-yellow-500 border-yellow-600 shadow-lg';
+                        checkTarget[checkTarget.indexOf(l)] = null;
+                    } else if (l) {
+                        rowCells[i].className = 'wordle-cell rounded-lg border flex items-center justify-center text-xl font-black uppercase bg-slate-700 border-slate-800 opacity-50';
+                    }
+                });
+
+                if (current === target) {
+                    gameOver = true; updateScore(200); sounds.playSuccess(); igniteSpread();
+                    updateHighScore('wordle', 1);
+                    NotificationManager.show("MATCH POINT! 🎊", "success");
+                    setTimeout(() => launchGame('wordle'), 2000);
+                } else {
+                    attempts++; current = '';
+                    if (attempts === 6) {
+                        gameOver = true; sounds.playError();
+                        NotificationManager.show(`Word was: ${target}`, "error");
+                        setTimeout(() => launchGame('wordle'), 2000);
+                    }
+                }
+            };
+        }
+
+        async function setupDino(parent) {
+            const game = games.find(g => g.id === 'dino');
+            game.instructions = "Tap or press space to make the dino jump over obstacles!";
+            await renderStartScreen(parent, game);
+
+            parent.innerHTML = `
+                <div class="text-center w-full max-w-sm mx-auto p-4">
+                    <h3 class="text-3xl font-black mb-4">Dino Run 🦖</h3>
+                    <canvas id="dino-canvas" class="bg-slate-900 rounded-2xl mx-auto shadow-2xl border-4 border-white/5" width="300" height="150"></canvas>
+                    <div class="mt-4 font-black text-2xl" id="dino-score">0</div>
+                    <p class="mt-2 opacity-30 text-[10px] font-bold uppercase tracking-widest">Tap or Space to Jump!</p>
+                </div>`;
+
+            const canvas = document.getElementById('dino-canvas'), ctx = canvas.getContext('2d');
+            let dino = { x: 50, y: 120, w: 20, h: 20, dy: 0, jumping: false };
+            let obstacles = [], dScore = 0, frame = 0;
+
+            const draw = () => {
+                ctx.fillStyle = "#0f172a"; ctx.fillRect(0, 0, 300, 150);
+                // Ground
+                ctx.strokeStyle = "rgba(255,255,255,0.1)";
+                ctx.beginPath(); ctx.moveTo(0, 140); ctx.lineTo(300, 140); ctx.stroke();
+
+                // Dino
+                ctx.fillStyle = "#3b82f6";
+                ctx.shadowBlur = 10; ctx.shadowColor = "#3b82f6";
+                ctx.fillRect(dino.x, dino.y, dino.w, dino.h);
+                ctx.shadowBlur = 0;
+
+                // Physics
+                if (dino.jumping) {
+                    dino.dy += 0.8;
+                    dino.y += dino.dy;
+                    if (dino.y >= 120) { dino.y = 120; dino.jumping = false; }
+                }
+
+                // Obstacles
+                if (frame++ % 60 === 0) obstacles.push({ x: 300, w: 15, h: 20 + Math.random() * 20 });
+                obstacles.forEach((o, i) => {
+                    o.x -= 4 + (dScore / 500);
+                    ctx.fillStyle = "#ef4444";
+                    ctx.fillRect(o.x, 140 - o.h, o.w, o.h);
+
+                    if (o.x < dino.x + dino.w && o.x + o.w > dino.x && 140 - o.h < dino.y + dino.h) {
+                        clearInterval(gameTimer); sounds.playError();
+                        updateHighScore('dino', dScore);
+                        NotificationManager.show(`Ouch! Score: ${dScore}`, "error");
+                        setTimeout(() => launchGame('dino'), 1500);
+                    }
+                });
+                obstacles = obstacles.filter(o => o.x > -20);
+                dScore++;
+                document.getElementById('dino-score').innerText = dScore;
+                if (dScore % 100 === 0) updateScore(1);
+            };
+
+            const jump = () => { if (!dino.jumping) { dino.dy = -10; dino.jumping = true; sounds.playPop(); } };
+            canvas.onclick = jump;
+            const handleKey = (e) => { if (e.code === 'Space' || e.key === 'ArrowUp') jump(); };
+            window.addEventListener('keydown', handleKey);
+
+            gameTimer = setInterval(draw, 1000 / 60);
+            const oldClose = closeModal;
+            window.closeModal = () => {
+                clearInterval(gameTimer);
+                window.removeEventListener('keydown', handleKey);
+                window.closeModal = oldClose;
+                oldClose();
+            };
+        }
+
+        async function setupFrogger(parent) {
+            const game = games.find(g => g.id === 'frogger');
+            game.instructions = "Use arrow keys to guide the frog across the road and reach the top!";
+            await renderStartScreen(parent, game);
+
+            parent.innerHTML = `
+                <div class="text-center w-full max-w-sm mx-auto p-4">
+                    <h3 class="text-3xl font-black mb-4">Frogger 🐸</h3>
+                    <canvas id="frog-canvas" class="bg-slate-800 rounded-2xl mx-auto shadow-2xl border-4 border-white/5" width="300" height="400"></canvas>
+                    <p class="mt-4 opacity-30 text-[10px] font-bold uppercase tracking-widest">Arrows to Move • Reach the Top!</p>
+                </div>`;
+
+            const canvas = document.getElementById('frog-canvas'), ctx = canvas.getContext('2d');
+            let frog = { x: 140, y: 370, w: 20, h: 20 };
+            let cars = [], lanes = [60, 100, 140, 180, 220, 260, 300];
+            lanes.forEach((y, i) => cars.push({ y, x: Math.random() * 300, speed: (i % 2 === 0 ? 1 : -1) * (2 + Math.random() * 2), w: 40 }));
+
+            const draw = () => {
+                ctx.fillStyle = "#1e293b"; ctx.fillRect(0, 0, 300, 400);
+                // Goal Area
+                ctx.fillStyle = "#16a34a"; ctx.fillRect(0, 0, 300, 40);
+
+                // Frog
+                ctx.fillStyle = "#4ade80"; ctx.fillRect(frog.x, frog.y, frog.w, frog.h);
+
+                // Cars
+                ctx.fillStyle = "#ef4444";
+                cars.forEach(c => {
+                    c.x += c.speed;
+                    if (c.x > 300) c.x = -40;
+                    if (c.x < -40) c.x = 300;
+                    ctx.fillRect(c.x, c.y, c.w, 20);
+
+                    if (frog.x < c.x + c.w && frog.x + frog.w > c.x && frog.y < c.y + 20 && frog.y + frog.h > c.y) {
+                        sounds.playError(); frog.x = 140; frog.y = 370;
+                        NotificationManager.show("Watch out! 🚗", "warning");
+                    }
+                });
+
+                if (frog.y < 40) {
+                    clearInterval(gameTimer); sounds.playSuccess(); updateScore(150);
+                    igniteSpread(); updateHighScore('frog', 1);
+                    NotificationManager.show("Safe! 🏁", "success");
+                    setTimeout(() => launchGame('frogger'), 1500);
+                }
+            };
+
+            const handleKey = (e) => {
+                if (e.key === 'ArrowUp') frog.y -= 20;
+                if (e.key === 'ArrowDown') frog.y += 20;
+                if (e.key === 'ArrowLeft') frog.x -= 20;
+                if (e.key === 'ArrowRight') frog.x += 20;
+                frog.x = Math.max(0, Math.min(280, frog.x));
+                frog.y = Math.max(0, Math.min(380, frog.y));
+                sounds.playClick();
+            };
+            window.addEventListener('keydown', handleKey);
+
+            gameTimer = setInterval(draw, 1000 / 60);
+            const oldClose = closeModal;
+            window.closeModal = () => {
+                clearInterval(gameTimer);
+                window.removeEventListener('keydown', handleKey);
+                window.closeModal = oldClose;
+                oldClose();
+            };
+        }
+
+        async function setupFruitSlice(parent) {
+            const game = games.find(g => g.id === 'slice');
+            game.instructions = "Click or swipe to slice the fruits as they appear!";
+            await renderStartScreen(parent, game);
+
+            parent.innerHTML = `
+                <div class="text-center w-full max-w-sm mx-auto p-4">
+                    <h3 class="text-3xl font-black mb-4">Fruit Slice 🍉</h3>
+                    <canvas id="slice-canvas" class="bg-slate-900 rounded-3xl mx-auto shadow-2xl cursor-crosshair" width="300" height="400"></canvas>
+                    <div class="mt-4 font-black text-2xl" id="slice-score">0</div>
+                </div>`;
+
+            const canvas = document.getElementById('slice-canvas'), ctx = canvas.getContext('2d');
+            let fruits = [], flScore = 0, frame = 0;
+            const emojis = ['🍎', '🍐', '🍊', '🍋', '🍌', '🍉', '🍇', '🍓'];
+
+            const draw = () => {
+                ctx.fillStyle = "rgba(15, 23, 42, 0.3)"; ctx.fillRect(0, 0, 300, 400);
+
+                if (frame++ % 40 === 0) {
+                    fruits.push({
+                        x: Math.random() * 250 + 25, y: 410,
+                        dx: (Math.random() - 0.5) * 4, dy: -12 - Math.random() * 5,
+                        emoji: emojis[Math.floor(Math.random() * emojis.length)],
+                        active: true
+                    });
+                }
+
+                fruits.forEach(f => {
+                    if (f.active) {
+                        f.x += f.dx; f.y += f.dy; f.dy += 0.4;
+                        ctx.font = "40px serif";
+                        ctx.textAlign = "center";
+                        ctx.fillText(f.emoji, f.x, f.y);
+                    }
+                });
+                fruits = fruits.filter(f => f.y < 450);
+            };
+
+            canvas.onclick = (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+                fruits.forEach(f => {
+                    if (f.active && Math.abs(mx - f.x) < 30 && Math.abs(my - f.y) < 30) {
+                        f.active = false; flScore += 10; updateScore(10);
+                        document.getElementById('slice-score').innerText = flScore;
+                        sounds.playPop(); ignite(e.clientX, e.clientY);
+                    }
+                });
+            };
+
+            gameTimer = setInterval(draw, 1000 / 60);
+            const oldClose = closeModal;
+            window.closeModal = () => {
+                clearInterval(gameTimer);
+                window.closeModal = oldClose;
+                oldClose();
+            };
+        }
+
+        async function setupWordSearch(parent) {
+            const game = games.find(g => g.id === 'search');
+            game.instructions = "Find all the hidden words in the grid!";
+            await renderStartScreen(parent, game);
+
+            const size = 10;
+            const words = ['NEW', 'YEAR', 'PARTY', 'CHEER', 'HAPPY'];
+            let found = [], selected = [];
+
+            parent.innerHTML = `
+                <div class="text-center w-full max-w-sm mx-auto p-4">
+                    <h3 class="text-3xl font-black mb-4">Word Search 🔍</h3>
+                    <div id="search-grid" class="grid grid-cols-10 gap-1 bg-white/5 p-2 rounded-2xl mx-auto shadow-inner mb-6">
+                        ${Array(100).fill().map((_, i) => `<div onclick="clickSearch(${i})" class="w-6 h-6 flex items-center justify-center text-[10px] font-black cursor-pointer rounded-md transition-all">?</div>`).join('')}
+                    </div>
+                    <div class="flex flex-wrap justify-center gap-2 mb-4">
+                        ${words.map(w => `<span id="w-${w}" class="px-2 py-1 glass rounded-lg text-[10px] font-bold opacity-50 uppercase">${w}</span>`).join('')}
+                    </div>
+                </div>`;
+
+            let grid = Array(100).fill('');
+            const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            words.forEach(w => {
+                let placed = false;
+                while (!placed) {
+                    let dir = Math.random() < 0.5 ? 1 : 10; // Horiz or Vert
+                    let start = Math.floor(Math.random() * 100);
+                    let end = start + (w.length - 1) * dir;
+                    if (end < 100 && (dir === 10 || Math.floor(start / 10) === Math.floor(end / 10))) {
+                        let fits = true;
+                        for (let i = 0; i < w.length; i++) if (grid[start + i * dir] && grid[start + i * dir] !== w[i]) fits = false;
+                        if (fits) {
+                            for (let i = 0; i < w.length; i++) grid[start + i * dir] = w[i];
+                            placed = true;
+                        }
+                    }
+                }
+            });
+            grid = grid.map(l => l || letters[Math.floor(Math.random() * 26)]);
+
+            const draw = () => {
+                const cells = document.querySelectorAll('#search-grid > div');
+                grid.forEach((l, i) => {
+                    cells[i].innerText = l;
+                    cells[i].className = `w-6 h-6 flex items-center justify-center text-[10px] font-black cursor-pointer rounded-md transition-all ${selected.includes(i) ? 'bg-[var(--primary)] text-white' : 'hover:bg-white/10'}`;
+                });
+            };
+
+            window.clickSearch = (i) => {
+                if (selected.includes(i)) selected = selected.filter(s => s !== i);
+                else selected.push(i);
+                sounds.playClick();
+                draw();
+                checkSearchWord();
+            };
+
+            const checkSearchWord = () => {
+                const selWord = selected.sort((a, b) => a - b).map(i => grid[i]).join('');
+                words.forEach(w => {
+                    if (!found.includes(w) && (selWord === w || selWord === w.split('').reverse().join(''))) {
+                        found.push(w);
+                        document.getElementById(`w-${w}`).classList.replace('opacity-50', 'bg-green-500');
+                        document.getElementById(`w-${w}`).classList.add('opacity-100');
+                        selected = []; draw();
+                        updateScore(50); sounds.playSuccess();
+                        if (found.length === words.length) {
+                            NotificationManager.show("All words found! 🎊", "success");
+                            updateHighScore('search', 1);
+                            setTimeout(() => launchGame('search'), 2000);
+                        }
+                    }
+                });
+            };
+            draw();
+        }
+
+        async function setupNeonRunner(parent) {
+            const game = games.find(g => g.id === 'runner');
+            game.instructions = "Click or press Space to flip gravity and avoid obstacles!";
+            await renderStartScreen(parent, game);
+            parent.innerHTML = `
+                <div class="text-center w-full max-w-sm mx-auto p-4">
+                    <h3 class="text-3xl font-black mb-4">Neon Runner 🏃</h3>
+                    <canvas id="runner-canvas" class="bg-black rounded-3xl mx-auto shadow-2xl" width="300" height="200"></canvas>
+                    <div class="mt-4 font-black text-2xl" id="runner-score">0</div>
+                    <p class="mt-2 opacity-30 text-[10px] font-bold uppercase tracking-widest text-[var(--primary)]">Tap or Space to Flip Gravity!</p>
+                </div>`;
+
+            const canvas = document.getElementById('runner-canvas'), ctx = canvas.getContext('2d');
+            let player = { x: 50, y: 160, w: 20, h: 20, gravity: 0.6, flipped: false };
+            let obstacles = [], rScore = 0, frame = 0, speed = 5;
+
+            const draw = () => {
+                ctx.fillStyle = "#000"; ctx.fillRect(0, 0, 300, 200);
+                // Rails
+                ctx.fillStyle = "#3b82f6"; ctx.fillRect(0, 0, 300, 10); ctx.fillRect(0, 190, 300, 10);
+
+                // Player with Neon Glow
+                ctx.shadowBlur = 15; ctx.shadowColor = "#06b6d4";
+                ctx.fillStyle = "#06b6d4"; ctx.fillRect(player.x, player.y, player.w, player.h);
+                ctx.shadowBlur = 0;
+
+                // Physics
+                player.y += player.flipped ? -speed : speed;
+                player.y = Math.max(10, Math.min(170, player.y));
+
+                // Obstacles
+                if (frame++ % 50 === 0) {
+                    let onTop = Math.random() < 0.5;
+                    obstacles.push({ x: 300, y: onTop ? 10 : 160, w: 20, h: 30 });
+                }
+
+                obstacles.forEach(o => {
+                    o.x -= 5 + (rScore / 1000);
+                    ctx.fillStyle = "#f43f5e";
+                    ctx.shadowBlur = 10; ctx.shadowColor = "#f43f5e";
+                    ctx.fillRect(o.x, o.y, o.w, o.h);
+                    ctx.shadowBlur = 0;
+
+                    if (player.x < o.x + o.w && player.x + player.w > o.x && player.y < o.y + o.h && player.y + player.h > o.y) {
+                        clearInterval(gameTimer); sounds.playError();
+                        updateHighScore('runner', rScore);
+                        NotificationManager.show(`System Failure! Score: ${rScore}`, "error");
+                        setTimeout(() => launchGame('runner'), 1500);
+                    }
+                });
+                obstacles = obstacles.filter(o => o.x > -20);
+                rScore++;
+                document.getElementById('runner-score').innerText = rScore;
+                if (rScore % 100 === 0) updateScore(1);
+            };
+
+            const flip = () => { player.flipped = !player.flipped; sounds.playClick(); };
+            canvas.onclick = flip;
+            const handleKey = (e) => { if (e.code === 'Space' || e.key === 'ArrowUp') flip(); };
+            window.addEventListener('keydown', handleKey);
+
+            gameTimer = setInterval(draw, 1000 / 60);
+            const oldClose = closeModal;
+            window.closeModal = () => {
+                clearInterval(gameTimer);
+                window.removeEventListener('keydown', handleKey);
+                window.closeModal = oldClose;
+                oldClose();
+            };
+        }
+
+        async function setupPacClone(parent) {
+            const game = games.find(g => g.id === 'pac');
+            game.instructions = "Eat all the dots! Avoid the ghosts unless they are blue.";
+            await renderStartScreen(parent, game);
+            parent.innerHTML = `
+                <div class="text-center w-full max-w-sm mx-auto p-4">
+                    <h3 class="text-3xl font-black mb-4">Pac-Clone 🟡</h3>
+                    <canvas id="pac-canvas" class="bg-slate-900 rounded-2xl mx-auto shadow-2xl border-4 border-blue-500/30" width="300" height="300"></canvas>
+                    <div class="mt-4 font-black text-2xl" id="pac-score">0</div>
+                    <p class="mt-2 opacity-30 text-[10px] font-bold uppercase tracking-widest">Use Arrow Keys to Eat Dots!</p>
+                </div>`;
+
+            const canvas = document.getElementById('pac-canvas'), ctx = canvas.getContext('2d');
+            let player = { x: 150, y: 150, dir: 'RIGHT', size: 12 };
+            let dots = [], ghosts = [], pScore = 0;
+            for (let i = 0; i < 10; i++) for (let j = 0; j < 10; j++) if (Math.random() > 0.2) dots.push({ x: i * 30 + 15, y: j * 30 + 15 });
+            ghosts.push({ x: 30, y: 30, dx: 2, dy: 0 }, { x: 270, y: 270, dx: -2, dy: 0 });
+
+            const draw = () => {
+                ctx.fillStyle = "#0f172a"; ctx.fillRect(0, 0, 300, 300);
+                // Dots
+                ctx.fillStyle = "#fbbf24";
+                dots.forEach(d => { ctx.beginPath(); ctx.arc(d.x, d.y, 3, 0, Math.PI * 2); ctx.fill(); });
+
+                // Player
+                ctx.fillStyle = "#facc15";
+                ctx.beginPath(); ctx.arc(player.x, player.y, player.size, 0.2 * Math.PI, 1.8 * Math.PI);
+                ctx.lineTo(player.x, player.y); ctx.fill();
+
+                // Ghosts
+                ghosts.forEach(g => {
+                    ctx.fillStyle = "#ef4444";
+                    ctx.beginPath(); ctx.arc(g.x, g.y, 12, Math.PI, 0);
+                    ctx.lineTo(g.x + 12, g.y + 12); ctx.lineTo(g.x - 12, g.y + 12); ctx.fill();
+                    g.x += g.dx; g.y += g.dy;
+                    if (g.x <= 15 || g.x >= 285) g.dx *= -1;
+                    if (g.y <= 15 || g.y >= 285) g.dy *= -1;
+                    if (Math.sqrt((player.x - g.x) ** 2 + (player.y - g.y) ** 2) < 20) {
+                        clearInterval(gameTimer); sounds.playError();
+                        NotificationManager.show("Ghosted! 👻", "error");
+                        setTimeout(() => launchGame('pac'), 1500);
+                    }
+                });
+
+                // Move Player
+                if (player.dir === 'RIGHT') player.x += 3;
+                if (player.dir === 'LEFT') player.x -= 3;
+                if (player.dir === 'UP') player.y -= 3;
+                if (player.dir === 'DOWN') player.y += 3;
+                player.x = (player.x + 300) % 300; player.y = (player.y + 300) % 300;
+
+                // Eat
+                dots = dots.filter(d => {
+                    if (Math.sqrt((player.x - d.x) ** 2 + (player.y - d.y) ** 2) < 15) {
+                        pScore += 10; updateScore(1); sounds.playPop(); return false;
+                    }
+                    return true;
+                });
+                document.getElementById('pac-score').innerText = pScore;
+                if (dots.length === 0) {
+                    clearInterval(gameTimer); sounds.playSuccess(); igniteSpread();
+                    NotificationManager.show("Level Clear! 🌟", "success");
+                    setTimeout(() => launchGame('pac'), 1500);
+                }
+            };
+
+            const handleKey = (e) => {
+                if (e.key === 'ArrowUp') player.dir = 'UP';
+                if (e.key === 'ArrowDown') player.dir = 'DOWN';
+                if (e.key === 'ArrowLeft') player.dir = 'LEFT';
+                if (e.key === 'ArrowRight') player.dir = 'RIGHT';
+            };
+            window.addEventListener('keydown', handleKey);
+
+            gameTimer = setInterval(draw, 1000 / 60);
+            const oldClose = closeModal;
+            window.closeModal = () => {
+                clearInterval(gameTimer); window.removeEventListener('keydown', handleKey);
+                window.closeModal = oldClose; oldClose();
+            };
+        }
+
+        async function setupJetpackNeon(parent) {
+            const game = games.find(g => g.id === 'jetpack');
+            game.instructions = "Hold click or Space to fly! Avoid the lasers.";
+            await renderStartScreen(parent, game);
+            parent.innerHTML = `
+                <div class="text-center w-full max-w-sm mx-auto p-4">
+                    <h3 class="text-3xl font-black mb-4">Jetpack Neon 🎒</h3>
+                    <canvas id="jet-canvas" class="bg-slate-900 rounded-2xl mx-auto shadow-2xl border-4 border-cyan-500/30" width="300" height="400"></canvas>
+                    <div class="mt-4 font-black text-2xl" id="jet-score">0</div>
+                    <p class="mt-2 opacity-30 text-[10px] font-bold uppercase tracking-widest text-cyan-400">Click & Hold to Fly!</p>
+                </div>`;
+
+            const canvas = document.getElementById('jet-canvas'), ctx = canvas.getContext('2d');
+            let player = { x: 50, y: 200, dy: 0, gravity: 0.4, thrust: -0.8, isThrusting: false };
+            let obstacles = [], jScore = 0, frame = 0;
+
+            const draw = () => {
+                ctx.fillStyle = "#0f172a"; ctx.fillRect(0, 0, 300, 400);
+
+                // Player
+                ctx.fillStyle = "#06b6d4";
+                ctx.fillRect(player.x, player.y, 20, 30);
+                if (player.isThrusting) {
+                    player.dy += player.thrust;
+                    // Flame
+                    ctx.fillStyle = "#f43f5e";
+                    ctx.fillRect(player.x + 5, player.y + 30, 10, 10 + Math.random() * 10);
+                }
+                player.dy += player.gravity;
+                player.y += player.dy;
+                if (player.y < 0) { player.y = 0; player.dy = 0; }
+                if (player.y > 370) {
+                    clearInterval(gameTimer); sounds.playError();
+                    NotificationManager.show("Crashed! 💥", "error");
+                    setTimeout(() => launchGame('jetpack'), 1500);
+                }
+
+                // Obstacles
+                if (frame++ % 80 === 0) obstacles.push({ x: 300, y: Math.random() * 300, w: 20, h: 50 });
+                obstacles.forEach(o => {
+                    o.x -= 3;
+                    ctx.fillStyle = "#fbbf24";
+                    ctx.fillRect(o.x, o.y, o.w, o.h);
+                    if (player.x < o.x + o.w && player.x + 20 > o.x && player.y < o.y + o.h && player.y + 30 > o.y) {
+                        clearInterval(gameTimer); sounds.playError();
+                        NotificationManager.show("Boom! 💥", "error");
+                        setTimeout(() => launchGame('jetpack'), 1500);
+                    }
+                });
+                obstacles = obstacles.filter(o => o.x > -20);
+                jScore++; document.getElementById('jet-score').innerText = jScore;
+                if (jScore % 100 === 0) updateScore(5);
+            };
+
+            canvas.onmousedown = () => { player.isThrusting = true; sounds.playPop(); };
+            canvas.onmouseup = () => player.isThrusting = false;
+            canvas.ontouchstart = (e) => { e.preventDefault(); player.isThrusting = true; };
+            canvas.ontouchend = () => player.isThrusting = false;
+
+            gameTimer = setInterval(draw, 1000 / 60);
+            const oldClose = closeModal;
+            window.closeModal = () => { clearInterval(gameTimer); window.closeModal = oldClose; oldClose(); };
+        }
+
+        async function setupCrystalMatch(parent) {
+            const game = games.find(g => g.id === 'match3');
+            game.instructions = "Click adjacent crystals to swap and match 3 or more of the same color.";
+            await renderStartScreen(parent, game);
+            parent.innerHTML = `
+                <div class="text-center w-full max-w-sm mx-auto p-4">
+                    <h3 class="text-3xl font-black mb-6">Crystal Match 💎</h3>
+                    <div id="match-grid" class="grid grid-cols-5 gap-2 bg-slate-800/50 p-2 rounded-2xl shadow-2xl mx-auto border border-white/10" style="width: 260px; height: 260px;">
+                        ${Array(25).fill().map((_, i) => `<div onclick="clickMatch(${i})" class="match-cell w-full h-full glass rounded-lg flex items-center justify-center text-2xl cursor-pointer hover:bg-white/10 transition-all transform active:scale-90"></div>`).join('')}
+                    </div>
+                </div>`;
+
+            const gems = ['💎', '💍', '✨', '🌟', '🔮'];
+            let grid = Array(25).fill().map(() => gems[Math.floor(Math.random() * gems.length)]);
+            let selected = null;
+
+            const draw = () => {
+                const cells = document.querySelectorAll('.match-cell');
+                grid.forEach((g, i) => {
+                    cells[i].innerText = g;
+                    cells[i].style.background = selected === i ? 'rgba(255,255,255,0.2)' : '';
+                });
+            };
+
+            window.clickMatch = (i) => {
+                if (selected === null) { selected = i; draw(); }
+                else {
+                    const row1 = Math.floor(selected / 5), col1 = selected % 5;
+                    const row2 = Math.floor(i / 5), col2 = i % 5;
+                    if (Math.abs(row1 - row2) + Math.abs(col1 - col2) === 1) {
+                        [grid[selected], grid[i]] = [grid[i], grid[selected]];
+                        sounds.playClick();
+                        checkMatches();
+                    }
+                    selected = null; draw();
+                }
+            };
+
+            const checkMatches = () => {
+                let toRemove = new Set();
+                // Rows
+                for (let r = 0; r < 5; r++) {
+                    for (let c = 0; c < 3; c++) {
+                        if (grid[r * 5 + c] === grid[r * 5 + c + 1] && grid[r * 5 + c] === grid[r * 5 + c + 2]) {
+                            toRemove.add(r * 5 + c); toRemove.add(r * 5 + c + 1); toRemove.add(r * 5 + c + 2);
+                        }
+                    }
+                }
+                // Cols
+                for (let c = 0; c < 5; c++) {
+                    for (let r = 0; r < 3; r++) {
+                        if (grid[r * 5 + c] === grid[(r + 1) * 5 + c] && grid[r * 5 + c] === grid[(r + 2) * 5 + c]) {
+                            toRemove.add(r * 5 + c); toRemove.add((r + 1) * 5 + c); toRemove.add((r + 2) * 5 + c);
+                        }
+                    }
+                }
+
+                if (toRemove.size > 0) {
+                    updateScore(toRemove.size * 10); sounds.playSuccess();
+                    toRemove.forEach(idx => {
+                        ignite(document.querySelectorAll('.match-cell')[idx].getBoundingClientRect().left, document.querySelectorAll('.match-cell')[idx].getBoundingClientRect().top);
+                        grid[idx] = gems[Math.floor(Math.random() * gems.length)];
+                    });
+                    setTimeout(checkMatches, 300);
+                }
+                draw();
+            };
+            draw();
+        }
+        async function setupTypeRacer(parent) {
+            const game = games.find(g => g.id === 'typer');
+            game.instructions = "Type the words as fast as you can to win the race!";
+            await renderStartScreen(parent, game);
+            const quotes = ["2026 IS THE YEAR OF AGENTIC AI", "HAPPY NEW YEAR TO ALL CODERS", "THE FUTURE IS BRIGHT AND AGENTIC", "ANTIGRAVITY POWERS WORLD ADVENTURE"];
+            const target = quotes[Math.floor(Math.random() * quotes.length)];
+            parent.innerHTML = `
+                <div class="text-center w-full max-w-sm mx-auto p-4">
+                    <h3 class="text-3xl font-black mb-6">Type Racer ⌨️</h3>
+                    <div class="glass p-6 rounded-2xl mb-6 text-xl font-bold tracking-tight leading-relaxed shadow-inner" id="type-target">${target}</div>
+                    <input type="text" id="type-input" class="w-full bg-white/5 border-2 border-white/10 rounded-2xl p-6 text-center text-xl font-black focus:border-cyan-500 outline-none transition-all" placeholder="Start Typing...">
+                </div>`;
+
+            const input = document.getElementById('type-input');
+            setTimeout(() => input.focus(), 100);
+            input.oninput = () => {
+                const val = input.value.toUpperCase();
+                if (target.startsWith(val)) {
+                    input.classList.remove('border-red-500'); input.classList.add('border-green-500');
+                    if (val === target) {
+                        updateScore(200); sounds.playSuccess(); igniteSpread();
+                        NotificationManager.show("Fast Fingers! ⚡", "success");
+                        setTimeout(() => launchGame('typer'), 1500);
+                    }
+                } else {
+                    input.classList.remove('border-green-500'); input.classList.add('border-red-500');
+                    sounds.playClick();
+                }
+            };
+        }
+
+        async function setupPowerBreaker(parent) {
+            const game = games.find(g => g.id === 'pbreak');
+            game.instructions = "Break the bricks with your ball. Catch power-ups for extra balls and wider paddles!";
+            await renderStartScreen(parent, game);
+            parent.innerHTML = `
+                <div class="text-center w-full max-w-sm mx-auto p-4">
+                    <h3 class="text-3xl font-black mb-4">Power Breaker 🔨</h3>
+                    <canvas id="pbreak-canvas" class="bg-slate-900 rounded-2xl mx-auto shadow-2xl border-4 border-rose-500/30" width="300" height="400"></canvas>
+                </div>`;
+            const canvas = document.getElementById('pbreak-canvas'), ctx = canvas.getContext('2d');
+            let ball = { x: 150, y: 350, dx: 3, dy: -3, size: 6 };
+            let paddle = { x: 120, w: 60, h: 10 };
+            let blocks = [], powers = [];
+            for (let i = 0; i < 6; i++) for (let j = 0; j < 4; j++) blocks.push({ x: i * 50 + 5, y: j * 25 + 40, w: 40, h: 15, active: true });
+
+            const draw = () => {
+                ctx.fillStyle = "#0f172a"; ctx.fillRect(0, 0, 300, 400);
+                // Ball
+                ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.size, 0, Math.PI * 2); ctx.fill();
+                ball.x += ball.dx; ball.y += ball.dy;
+                if (ball.x < 5 || ball.x > 295) ball.dx *= -1;
+                if (ball.y < 5) ball.dy *= -1;
+                if (ball.y > 385 && ball.x > paddle.x && ball.x < paddle.x + paddle.w) { ball.dy *= -1; sounds.playPop(); }
+                else if (ball.y > 400) { clearInterval(gameTimer); sounds.playError(); NotificationManager.show("Loss! 💔", "error"); setTimeout(() => launchGame('pbreak'), 1500); }
+
+                // Paddle
+                ctx.fillStyle = "#f43f5e"; ctx.fillRect(paddle.x, 390, paddle.w, paddle.h);
+
+                // Blocks
+                ctx.fillStyle = "#3b82f6";
+                blocks.forEach(b => {
+                    if (!b.active) return;
+                    ctx.fillRect(b.x, b.y, b.w, b.h);
+                    if (ball.x > b.x && ball.x < b.x + b.w && ball.y > b.y && ball.y < b.y + b.h) {
+                        b.active = false; ball.dy *= -1; updateScore(10); sounds.playClick();
+                        if (Math.random() > 0.7) powers.push({ x: b.x + 20, y: b.y, dy: 2 });
+                    }
+                });
+
+                // Powers
+                ctx.fillStyle = "#22c55e";
+                powers.forEach((p, i) => {
+                    p.y += p.dy;
+                    ctx.fillText('⚡', p.x, p.y);
+                    if (p.y > 390 && p.x > paddle.x && p.x < paddle.x + paddle.w) {
+                        paddle.w = 100; setTimeout(() => paddle.w = 60, 5000);
+                        powers.splice(i, 1); sounds.playSuccess(); NotificationManager.show("POWER UP! ⚡", "success");
+                    }
+                });
+
+                if (blocks.every(b => !b.active)) { clearInterval(gameTimer); sounds.playSuccess(); NotificationManager.show("Victory! 🏆", "success"); setTimeout(() => launchGame('pbreak'), 1500); }
+            };
+
+            canvas.onmousemove = (e) => {
+                const rect = canvas.getBoundingClientRect();
+                paddle.x = e.clientX - rect.left - paddle.w / 2;
+                paddle.x = Math.max(0, Math.min(300 - paddle.w, paddle.x));
+            };
+            gameTimer = setInterval(draw, 1000 / 60);
+            const oldClose = closeModal;
+            window.closeModal = () => { clearInterval(gameTimer); window.closeModal = oldClose; oldClose(); };
+        }
+
+        async function setupTowerStack(parent) {
+            const game = games.find(g => g.id === 'tower');
+            game.instructions = "Click to drop the blocks and stack them as high as you can!";
+            await renderStartScreen(parent, game);
+            parent.innerHTML = `
+                <div class="text-center w-full max-w-sm mx-auto p-4">
+                    <h3 class="text-3xl font-black mb-4">Tower Stack 🏢</h3>
+                    <canvas id="tower-canvas" class="bg-slate-900 rounded-3xl mx-auto shadow-2xl border-4 border-amber-500/30" width="300" height="400"></canvas>
+                    <div class="mt-4 font-black text-2xl" id="tower-score">0</div>
+                    <p class="mt-2 opacity-30 text-[10px] font-bold uppercase tracking-widest">Click to Drop & Stack!</p>
+                </div>`;
+            const canvas = document.getElementById('tower-canvas'), ctx = canvas.getContext('2d');
+            let tower = [{ x: 100, y: 380, w: 100 }], curBlock = { x: 0, y: 360, w: 100, dx: 4 };
+            let tScore = 0;
+
+            const draw = () => {
+                ctx.fillStyle = "#0f172a"; ctx.fillRect(0, 0, 300, 400);
+                // Stack
+                ctx.fillStyle = "#f59e0b";
+                tower.forEach(b => ctx.fillRect(b.x, b.y, b.w, 20));
+
+                // Moving
+                ctx.fillStyle = "#fbbf24";
+                ctx.fillRect(curBlock.x, curBlock.y, curBlock.w, 20);
+                curBlock.x += curBlock.dx;
+                if (curBlock.x <= 0 || curBlock.x + curBlock.w >= 300) curBlock.dx *= -1;
+            };
+
+            canvas.onclick = () => {
+                const last = tower[tower.length - 1];
+                const overlap = Math.min(curBlock.x + curBlock.w, last.x + last.w) - Math.max(curBlock.x, last.x);
+                if (overlap > 0) {
+                    const newX = Math.max(curBlock.x, last.x);
+                    tower.push({ x: newX, y: curBlock.y, w: overlap });
+                    tScore++; updateScore(20); sounds.playSuccess();
+                    document.getElementById('tower-score').innerText = tScore;
+                    curBlock = { x: 0, y: curBlock.y - 20, w: overlap, dx: 4 + tScore / 2 };
+                    if (curBlock.y < 40) tower.shift(), tower.forEach(b => b.y += 20), curBlock.y += 20;
+                } else {
+                    clearInterval(gameTimer); sounds.playError(); NotificationManager.show("Tower Toppled! 🏢", "error"); setTimeout(() => launchGame('tower'), 1500);
+                }
+            };
+
+            gameTimer = setInterval(draw, 1000 / 60);
+            const oldClose = closeModal;
+            window.closeModal = () => { clearInterval(gameTimer); window.closeModal = oldClose; oldClose(); };
+        }
+
+        async function setupQuest(parent) {
+            const game = games.find(g => g.id === 'quest');
+            game.instructions = "Choose your action to defeat the 2025 Bugs in this turn-based battle!";
+            await renderStartScreen(parent, game);
+            let hp = 100, bugHp = 100;
+            parent.innerHTML = `
+                <div class="text-center w-full max-w-sm mx-auto p-4 space-y-6">
+                    <h3 class="text-3xl font-black mb-4">2026 Quest ⚔️</h3>
+                    <div class="flex justify-between items-end h-32">
+                        <div class="text-6xl animate-bounce">🧙‍♂️<div class="h-2 w-full bg-slate-200 rounded-full mt-2"><div id="hp" class="h-full bg-green-500 rounded-full" style="width: 100%"></div></div></div>
+                        <div class="text-6xl animate-pulse">🐛<div class="h-2 w-full bg-slate-200 rounded-full mt-2"><div id="bug-hp" class="h-full bg-red-500 rounded-full" style="width: 100%"></div></div></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4" id="quest-actions">
+                        <button onclick="questMove('atk')" class="py-4 glass font-black rounded-2xl hover:bg-red-500 hover:text-white transition-all">ATTACK</button>
+                        <button onclick="questMove('heal')" class="py-4 glass font-black rounded-2xl hover:bg-green-500 hover:text-white transition-all">HEAL</button>
+                    </div>
+                </div>`;
+
+            window.questMove = (type) => {
+                if (type === 'atk') {
+                    const dmg = 10 + Math.floor(Math.random() * 10); bugHp -= dmg;
+                    NotificationManager.show(`Hit Bug for ${dmg}! ⚔️`, "info");
+                    sounds.playClick();
+                } else {
+                    const heal = 15; hp = Math.min(100, hp + heal);
+                    NotificationManager.show(`Healed for ${heal}! ✨`, "success");
+                    sounds.playSuccess();
+                }
+
+                if (bugHp <= 0) {
+                    updateScore(300); igniteSpread(); NotificationManager.show("2025 BUG SQUASHED! 🎊", "success");
+                    setTimeout(() => launchGame('quest'), 1500);
+                } else {
+                    const bugDmg = 12; hp -= bugDmg;
+                    NotificationManager.show(`Bug attacked for ${bugDmg}! ⚠️`, "error");
+                    sounds.playError();
+                    if (hp <= 0) { NotificationManager.show("Defeated! 💀", "error"); setTimeout(() => launchGame('quest'), 1500); }
+                }
+                document.getElementById('hp').style.width = hp + '%';
+                document.getElementById('bug-hp').style.width = bugHp + '%';
+            };
+        }
+
+
+        async function setupAsteroids(parent) {
+            const game = games.find(g => g.id === 'ast');
+            game.instructions = "Arrows to Move, Space to Shoot. Clear the asteroids and avoid collisions!";
+            await renderStartScreen(parent, game);
+            parent.innerHTML = `
+                <div class="text-center w-full max-w-sm mx-auto p-4">
+                    <h3 class="text-3xl font-black mb-4">Asteroids ☄️</h3>
+                    <canvas id="ast-canvas" class="bg-black rounded-2xl mx-auto shadow-2xl border-4 border-slate-800" width="300" height="300"></canvas>
+                    <div class="mt-4 font-black text-2xl" id="ast-score">0</div>
+                    <p class="mt-2 opacity-30 text-[10px] font-bold uppercase tracking-widest">Arrows: Move/Rotate • Space: Shoot</p>
+                </div>`;
+            const canvas = document.getElementById('ast-canvas'), ctx = canvas.getContext('2d');
+            let ship = { x: 150, y: 150, r: -Math.PI / 2, rot: 0, v: { x: 0, y: 0 }, size: 10 };
+            let rocks = [], bullets = [], aScore = 0;
+            const createRock = (x, y, s) => ({ x, y, s, v: { x: (Math.random() - 0.5) * 2, y: (Math.random() - 0.5) * 2 }, r: Math.random() * 20 + 10 });
+            for (let i = 0; i < 3; i++) rocks.push(createRock(Math.random() * 300, Math.random() * 300, 3));
+
+            const draw = () => {
+                ctx.fillStyle = "#000"; ctx.fillRect(0, 0, 300, 300);
+                // Ship
+                ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.beginPath();
+                ctx.moveTo(ship.x + Math.cos(ship.r) * ship.size, ship.y + Math.sin(ship.r) * ship.size);
+                ctx.lineTo(ship.x + Math.cos(ship.r + 2.5) * ship.size, ship.y + Math.sin(ship.r + 2.5) * ship.size);
+                ctx.lineTo(ship.x + Math.cos(ship.r - 2.5) * ship.size, ship.y + Math.sin(ship.r - 2.5) * ship.size);
+                ctx.closePath(); ctx.stroke();
+
+                ship.r += ship.rot; ship.x = (ship.x + ship.v.x + 300) % 300; ship.y = (ship.y + ship.v.y + 300) % 300;
+                ship.v.x *= 0.99; ship.v.y *= 0.99;
+
+                // Bullets
+                ctx.fillStyle = "#fff";
+                bullets.forEach((b, i) => {
+                    b.x = (b.x + b.v.x + 300) % 300; b.y = (b.y + b.v.y + 300) % 300;
+                    ctx.fillRect(b.x, b.y, 2, 2);
+                    if (Date.now() - b.t > 1500) bullets.splice(i, 1);
+                });
+
+                // Rocks
+                rocks.forEach((r, i) => {
+                    r.x = (r.x + r.v.x + 300) % 300; r.y = (r.y + r.v.y + 300) % 300;
+                    ctx.strokeStyle = "#fff"; ctx.beginPath(); ctx.arc(r.x, r.y, r.r, 0, Math.PI * 2); ctx.stroke();
+                    // Collision Bullets
+                    bullets.forEach((b, bi) => {
+                        if (Math.sqrt((b.x - r.x) ** 2 + (b.y - r.y) ** 2) < r.r) {
+                            bullets.splice(bi, 1); rocks.splice(i, 1);
+                            if (r.r > 10) { rocks.push(createRock(r.x, r.y, r.s - 1), createRock(r.x, r.y, r.s - 1)); rocks[rocks.length - 1].r = r.r / 2; rocks[rocks.length - 2].r = r.r / 2; }
+                            aScore += 100; updateScore(5); sounds.playPop(); ignite(r.x, r.y);
+                        }
+                    });
+                    // Collision Ship
+                    if (Math.sqrt((ship.x - r.x) ** 2 + (ship.y - r.y) ** 2) < r.r + 5) {
+                        clearInterval(gameTimer); sounds.playError();
+                        NotificationManager.show("Total Destruction! 💥", "error");
+                        setTimeout(() => launchGame('ast'), 1500);
+                    }
+                });
+                document.getElementById('ast-score').innerText = aScore;
+                if (rocks.length === 0) {
+                    NotificationManager.show("Sector Clear! 🚀", "success");
+                    setTimeout(() => launchGame('ast'), 1500);
+                    clearInterval(gameTimer);
+                }
+            };
+
+            const handleKeys = (e) => {
+                if (e.key === 'ArrowLeft') ship.rot = -0.1;
+                if (e.key === 'ArrowRight') ship.rot = 0.1;
+                if (e.key === 'ArrowUp') { ship.v.x += Math.cos(ship.r) * 0.2; ship.v.y += Math.sin(ship.r) * 0.2; }
+                if (e.code === 'Space') { bullets.push({ x: ship.x, y: ship.y, v: { x: Math.cos(ship.r) * 5, y: Math.sin(ship.r) * 5 }, t: Date.now() }); sounds.playClick(); }
+            };
+            const stopKeys = (e) => { if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') ship.rot = 0; };
+            window.addEventListener('keydown', handleKeys); window.addEventListener('keyup', stopKeys);
+
+            gameTimer = setInterval(draw, 1000 / 60);
+            const oldClose = closeModal;
+            window.closeModal = () => { clearInterval(gameTimer); window.removeEventListener('keydown', handleKeys); window.removeEventListener('keyup', stopKeys); window.closeModal = oldClose; oldClose(); };
+        }
+
+        async function setupCentipede(parent) {
+            const game = games.find(g => g.id === 'centi');
+            game.instructions = "Shoot the centipede and mushrooms. Avoid being touched by the centipede!";
+            await renderStartScreen(parent, game);
+            parent.innerHTML = `
+                <div class="text-center w-full max-w-sm mx-auto p-4">
+                    <h3 class="text-3xl font-black mb-4">Centipede 🐛</h3>
+                    <canvas id="centi-canvas" class="bg-emerald-950 rounded-2xl mx-auto shadow-2xl border-4 border-emerald-500/30" width="300" height="300"></canvas>
+                    <div class="mt-4 font-black text-2xl" id="centi-score">0</div>
+                </div>`;
+            const canvas = document.getElementById('centi-canvas'), ctx = canvas.getContext('2d');
+            let player = { x: 150, y: 280 }, bullets = [], centipede = [], mushrooms = [], cScore = 0;
+            for (let i = 0; i < 10; i++) centipede.push({ x: i * 15, y: 0, dir: 1 });
+            for (let i = 0; i < 30; i++) mushrooms.push({ x: Math.floor(Math.random() * 20) * 15, y: Math.floor(Math.random() * 15 + 2) * 15 });
+
+            const draw = () => {
+                ctx.fillStyle = "#022c22"; ctx.fillRect(0, 0, 300, 300);
+                // Player
+                ctx.fillStyle = "#fff"; ctx.fillRect(player.x - 5, player.y - 5, 10, 10);
+
+                // Mushrooms
+                ctx.fillStyle = "#fb7185";
+                mushrooms.forEach(m => ctx.fillRect(m.x + 2, m.y + 2, 11, 11));
+
+                // Bullets
+                ctx.fillStyle = "#fff";
+                bullets.forEach((b, i) => {
+                    b.y -= 5;
+                    ctx.fillRect(b.x - 1, b.y, 2, 8);
+                    if (b.y < 0) bullets.splice(i, 1);
+                    mushrooms.forEach((m, mi) => {
+                        if (Math.abs(b.x - m.x - 7.5) < 7.5 && Math.abs(b.y - m.y - 7.5) < 7.5) { mushrooms.splice(mi, 1); bullets.splice(i, 1); cScore += 10; sounds.playClick(); }
+                    });
+                });
+
+                // Centipede
+                ctx.fillStyle = "#4ade80";
+                centipede.forEach((s, i) => {
+                    s.x += s.dir * 3;
+                    let hitMush = mushrooms.some(m => Math.abs(s.x - m.x) < 15 && Math.abs(s.y - m.y) < 15);
+                    if (s.x > 285 || s.x < 15 || hitMush) { s.dir *= -1; s.y += 15; }
+                    ctx.beginPath(); ctx.arc(s.x, s.y, 7, 0, Math.PI * 2); ctx.fill();
+
+                    bullets.forEach((b, bi) => {
+                        if (Math.sqrt((b.x - s.x) ** 2 + (b.y - s.y) ** 2) < 10) {
+                            centipede.splice(i, 1); bullets.splice(bi, 1); mushrooms.push({ x: Math.floor(s.x / 15) * 15, y: Math.floor(s.y / 15) * 15 });
+                            cScore += 50; updateScore(5); sounds.playPop();
+                        }
+                    });
+                    if (Math.sqrt((player.x - s.x) ** 2 + (player.y - s.y) ** 2) < 15) {
+                        clearInterval(gameTimer); sounds.playError();
+                        NotificationManager.show("Infected! 🤢", "error");
+                        setTimeout(() => launchGame('centi'), 1500);
+                    }
+                });
+
+                document.getElementById('centi-score').innerText = cScore;
+                if (centipede.length === 0) { NotificationManager.show("Exterminated! 🕷️", "success"); setTimeout(() => launchGame('centi'), 1500); clearInterval(gameTimer); }
+            };
+
+            canvas.onmousemove = (e) => {
+                const rect = canvas.getBoundingClientRect();
+                player.x = e.clientX - rect.left;
+                player.x = Math.max(10, Math.min(290, player.x));
+            };
+            canvas.onclick = () => { if (bullets.length < 3) { bullets.push({ x: player.x, y: player.y }); sounds.playClick(); } };
+
+            gameTimer = setInterval(draw, 1000 / 60);
+            const oldClose = closeModal;
+            window.closeModal = () => { clearInterval(gameTimer); window.closeModal = oldClose; oldClose(); };
+        }
+
+        async function setupDonkeyClone(parent) {
+            const game = games.find(g => g.id === 'dk');
+            game.instructions = "Jump over barrels and reach the top to save the day!";
+            await renderStartScreen(parent, game);
+            parent.innerHTML = `
+                <div class="text-center w-full max-w-sm mx-auto p-4">
+                    <h3 class="text-3xl font-black mb-4">Donkey Clone 🦍</h3>
+                    <canvas id="dk-canvas" class="bg-indigo-950 rounded-2xl mx-auto shadow-2xl border-4 border-amber-600/30" width="300" height="300"></canvas>
+                    <div class="mt-4 font-black text-2xl" id="dk-score">0</div>
+                    <p class="mt-2 opacity-30 text-[10px] font-bold uppercase tracking-widest">Click to Jump! Reach the top!</p>
+                </div>`;
+            const canvas = document.getElementById('dk-canvas'), ctx = canvas.getContext('2d');
+            let player = { x: 20, y: 260, dy: 0, ground: 260, jumping: false };
+            let barrels = [], frame = 0, dkScore = 0;
+            let platforms = [{ x: 0, y: 280, w: 300, h: 20 }, { x: 50, y: 220, w: 250, h: 10 }, { x: 0, y: 160, w: 250, h: 10 }, { x: 50, y: 100, w: 250, h: 10 }];
+
+            const draw = () => {
+                ctx.fillStyle = "#1e1b4b"; ctx.fillRect(0, 0, 300, 300);
+                // Platforms
+                ctx.fillStyle = "#92400e";
+                platforms.forEach(p => ctx.fillRect(p.x, p.y, p.w, p.h));
+
+                // Player
+                ctx.fillStyle = "#ef4444";
+                if (player.jumping) { player.dy += 0.5; player.y += player.dy; if (player.y >= player.ground) { player.y = player.ground; player.jumping = false; } }
+                ctx.fillRect(player.x, player.y, 20, 20);
+                player.x += 1; if (player.x > 280) player.x = 20, player.y -= 60, player.ground -= 60;
+                if (player.y < 40) { NotificationManager.show("VICTORY! 🍌", "success"); updateScore(500); igniteSpread(); setTimeout(() => launchGame('dk'), 1500); clearInterval(gameTimer); }
+
+                // Barrels
+                if (frame++ % 100 === 0) barrels.push({ x: 280, y: 80, dy: 0, plat: 3 });
+                ctx.fillStyle = "#fbbf24";
+                barrels.forEach((b, i) => {
+                    b.x -= 2;
+                    ctx.beginPath(); ctx.arc(b.x, b.y + 10, 10, 0, Math.PI * 2); ctx.fill();
+                    if (b.x < 0) { b.x = 280; b.y += 60; b.plat--; if (b.plat < 0) barrels.splice(i, 1); }
+                    if (Math.sqrt((player.x + 10 - b.x) ** 2 + (player.y + 10 - (b.y + 10)) ** 2) < 15) {
+                        clearInterval(gameTimer); sounds.playError(); NotificationManager.show("Smashed! 🦍", "error");
+                        setTimeout(() => launchGame('dk'), 1500);
+                    }
+                });
+            };
+
+            canvas.onclick = () => { if (!player.jumping) { player.dy = -8; player.jumping = true; sounds.playClick(); } };
+            gameTimer = setInterval(draw, 1000 / 60);
+            const oldClose = closeModal;
+            window.closeModal = () => { clearInterval(gameTimer); window.closeModal = oldClose; oldClose(); };
+        }
+
+        async function setupBoulderDash(parent) {
+            const game = games.find(g => g.id === 'boulder');
+            game.instructions = "Dig through the earth, collect gems, and watch out for falling boulders!";
+            await renderStartScreen(parent, game);
+            parent.innerHTML = `
+                <div class="text-center w-full max-w-sm mx-auto p-4">
+                    <h3 class="text-3xl font-black mb-4">Boulder Dash 💎</h3>
+                    <canvas id="boul-canvas" class="bg-stone-950 rounded-2xl mx-auto shadow-2xl border-4 border-stone-800" width="300" height="300"></canvas>
+                    <div class="mt-4 font-black text-2xl" id="boul-score">0</div>
+                </div>`;
+            const canvas = document.getElementById('boul-canvas'), ctx = canvas.getContext('2d');
+            let grid = [], player = { x: 1, y: 1 }, bScore = 0;
+            const sz = 20;
+            for (let y = 0; y < 15; y++) {
+                grid[y] = [];
+                for (let x = 0; x < 15; x++) {
+                    if (x === 0 || y === 0 || x === 14 || y === 14) grid[y][x] = 'W';
+                    else if (Math.random() < 0.1) grid[y][x] = 'B';
+                    else if (Math.random() < 0.05) grid[y][x] = 'D';
+                    else grid[y][x] = 'S';
+                }
+            }
+            grid[player.y][player.x] = 'P';
+
+            const draw = () => {
+                ctx.fillStyle = "#0c0a09"; ctx.fillRect(0, 0, 300, 300);
+                for (let y = 0; y < 15; y++) {
+                    for (let x = 0; x < 15; x++) {
+                        if (grid[y][x] === 'W') { ctx.fillStyle = "#444"; ctx.fillRect(x * sz, y * sz, sz - 1, sz - 1); }
+                        if (grid[y][x] === 'S') { ctx.fillStyle = "#8b5e3c"; ctx.fillRect(x * sz + 4, y * sz + 4, sz - 8, sz - 8); }
+                        if (grid[y][x] === 'B') { ctx.fillStyle = "#78716c"; ctx.beginPath(); ctx.arc(x * sz + sz / 2, y * sz + sz / 2, sz / 2 - 2, 0, Math.PI * 2); ctx.fill(); }
+                        if (grid[y][x] === 'D') { ctx.fillStyle = "#06b6d4"; ctx.beginPath(); ctx.moveTo(x * sz + sz / 2, y * sz + 2); ctx.lineTo(x * sz + sz - 2, y * sz + sz / 2); ctx.lineTo(x * sz + sz / 2, y * sz + sz - 2); ctx.lineTo(x * sz + 2, y * sz + sz / 2); ctx.fill(); }
+                        if (grid[y][x] === 'P') { ctx.fillStyle = "#fff"; ctx.fillRect(x * sz + 2, y * sz + 2, sz - 4, sz - 4); }
+                    }
+                }
+                // Falling physics
+                for (let y = 13; y >= 1; y--) {
+                    for (let x = 1; x < 14; x++) {
+                        if ((grid[y][x] === 'B' || grid[y][x] === 'D') && grid[y + 1][x] === null) {
+                            grid[y + 1][x] = grid[y][x]; grid[y][x] = null;
+                            if (y + 1 === player.y && x === player.x) { clearInterval(gameTimer); sounds.playError(); NotificationManager.show("Crushed! 🪨", "error"); setTimeout(() => launchGame('boulder'), 1500); }
+                        }
+                    }
+                }
+                document.getElementById('boul-score').innerText = bScore;
+                if (bScore >= 100) { NotificationManager.show("Cave Exit Reached! 💎", "success"); updateScore(200); igniteSpread(); clearInterval(gameTimer); }
+            };
+
+            const move = (dx, dy) => {
+                let nx = player.x + dx, ny = player.y + dy;
+                if (grid[ny][nx] === 'W' || (grid[ny][nx] === 'B' && dy !== 0)) return;
+                if (grid[ny][nx] === 'B' && dx !== 0 && grid[ny][nx + dx] === null) { grid[ny][nx + dx] = 'B'; }
+                else if (grid[ny][nx] === 'B') return;
+
+                if (grid[ny][nx] === 'D') { bScore += 20; updateScore(5); sounds.playSuccess(); }
+                grid[player.y][player.x] = null;
+                player.x = nx; player.y = ny;
+                grid[player.y][player.x] = 'P';
+                sounds.playPop();
+            };
+
+            const handleKey = (e) => {
+                if (e.key === 'ArrowUp') move(0, -1);
+                if (e.key === 'ArrowDown') move(0, 1);
+                if (e.key === 'ArrowLeft') move(-1, 0);
+                if (e.key === 'ArrowRight') move(1, 0);
+            };
+            window.addEventListener('keydown', handleKey);
+            gameTimer = setInterval(draw, 200);
+            const oldClose = closeModal;
+            window.closeModal = () => { clearInterval(gameTimer); window.removeEventListener('keydown', handleKey); window.closeModal = oldClose; oldClose(); };
+        }
+
+        async function setupLemmings(parent) {
+            const game = games.find(g => g.id === 'lem');
+            game.instructions = "Guide the lemmings to the exit by building paths and managing their movement.";
+            await renderStartScreen(parent, game);
+            parent.innerHTML = `
+                <div class="text-center w-full max-w-sm mx-auto p-4">
+                    <h3 class="text-3xl font-black mb-4">Mini Lemmings 🚶</h3>
+                    <canvas id="lem-canvas" class="bg-blue-950 rounded-2xl mx-auto shadow-2xl border-4 border-blue-500/30" width="300" height="200"></canvas>
+                    <div class="mt-4 font-black text-2xl" id="lem-score">0</div>
+                    <p class="mt-2 opacity-30 text-[10px] font-bold uppercase tracking-widest">Guide them to the Exit!</p>
+                </div>`;
+            const canvas = document.getElementById('lem-canvas'), ctx = canvas.getContext('2d');
+            let lemmings = [], frame = 0, saved = 0;
+            let map = [{ x: 0, y: 150, w: 100 }, { x: 120, y: 120, w: 80 }, { x: 220, y: 180, w: 80 }];
+            const exit = { x: 270, y: 160 };
+
+            canvas.onmousedown = (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                map.push({ x: x - 20, y: y, w: 40 });
+                sounds.playClick();
+            };
+
+            const draw = () => {
+                ctx.fillStyle = "#172554"; ctx.fillRect(0, 0, 300, 200);
+                // Map
+                ctx.fillStyle = "#4ade80";
+                map.forEach(p => ctx.fillRect(p.x, p.y, p.w, 10));
+                ctx.fillStyle = "#fbbf24"; ctx.fillRect(exit.x, exit.y, 20, 20); // Exit
+
+                // Lemmings
+                if (frame++ % 100 === 0 && lemmings.length < 10) lemmings.push({ x: 20, y: 0, dir: 1, state: 'walk' });
+                ctx.fillStyle = "#fff";
+                lemmings.forEach((l, i) => {
+                    let onGround = map.some(p => l.x > p.x && l.x < p.x + p.w && Math.abs(l.y + 15 - p.y) < 5);
+                    if (!onGround) l.y += 2;
+                    else if (l.state === 'walk') l.x += l.dir;
+
+                    if (l.x > 290 || l.x < 10) l.dir *= -1;
+                    ctx.fillRect(l.x - 5, l.y, 10, 15);
+
+                    if (l.x > exit.x && l.x < exit.x + 20 && l.y > exit.y && l.y < exit.y + 20) {
+                        lemmings.splice(i, 1); saved++; updateScore(50); sounds.playSuccess();
+                        document.getElementById('lem-score').innerText = saved;
+                    }
+                    if (l.y > 200) lemmings.splice(i, 1);
+                });
+                if (saved >= 5) { NotificationManager.show("Colony Saved! 🏠", "success"); updateScore(100); igniteSpread(); clearInterval(gameTimer); }
+            };
+            gameTimer = setInterval(draw, 1000 / 60);
+            const oldClose = closeModal;
+            window.closeModal = () => { clearInterval(gameTimer); window.closeModal = oldClose; oldClose(); };
+        }
+
+        async function setupQbert(parent) {
+            const game = games.find(g => g.id === 'qbert');
+            game.instructions = "Jump on every block to change its color and clear the level!";
+            await renderStartScreen(parent, game);
+            parent.innerHTML = `
+                <div class="text-center w-full max-w-sm mx-auto p-4">
+                    <h3 class="text-3xl font-black mb-4">Q-Block 🧊</h3>
+                    <canvas id="q-canvas" class="bg-indigo-950 rounded-2xl mx-auto shadow-2xl border-4 border-indigo-500/30" width="300" height="300"></canvas>
+                </div>`;
+            const canvas = document.getElementById('q-canvas'), ctx = canvas.getContext('2d');
+            let player = { r: 0, c: 0 }, tiles = [];
+            for (let r = 0; r < 5; r++) { for (let c = 0; c <= r; c++) tiles.push({ r, c, v: 0 }); }
+
+            const draw = () => {
+                ctx.fillStyle = "#1e1b4b"; ctx.fillRect(0, 0, 300, 300);
+                tiles.forEach(t => {
+                    const x = 150 + (t.c - t.r / 2) * 40;
+                    const y = 80 + t.r * 40;
+                    ctx.fillStyle = t.v ? "#4ade80" : "#3b82f6";
+                    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + 20, y + 10); ctx.lineTo(x, y + 20); ctx.lineTo(x - 20, y + 10); ctx.fill();
+                    if (t.r === player.r && t.c === player.c) { ctx.fillStyle = "#fff"; ctx.fillRect(x - 5, y - 5, 10, 10); }
+                });
+                if (tiles.every(t => t.v)) { NotificationManager.show("All Blocks Flipped! 🎲", "success"); updateScore(300); igniteSpread(); clearInterval(gameTimer); }
+            };
+
+            const handleKey = (e) => {
+                let nr = player.r, nc = player.c;
+                if (e.key === 'ArrowUp') nr--, nc--;
+                if (e.key === 'ArrowDown') nr++, nc++;
+                if (e.key === 'ArrowLeft') nr++, nc;
+                if (e.key === 'ArrowRight') nr--, nc;
+
+                let target = tiles.find(t => t.r === nr && t.c === nc);
+                if (target) { player.r = nr; player.c = nc; target.v = 1; sounds.playPop(); draw(); }
+                else sounds.playError();
+            };
+
+            window.addEventListener('keydown', handleKey);
+            draw();
+            const oldClose = closeModal;
+            window.closeModal = () => { window.removeEventListener('keydown', handleKey); window.closeModal = oldClose; oldClose(); };
+        }
+
+        async function setupDigClone(parent) {
+            const game = games.find(g => g.id === 'dig');
+            game.instructions = "Dig tunnels and pump up your enemies until they pop!";
+            await renderStartScreen(parent, game);
+            parent.innerHTML = `
+                <div class="text-center w-full max-w-sm mx-auto p-4">
+                    <h3 class="text-3xl font-black mb-4">Dig Clone 🚜</h3>
+                    <canvas id="dig-canvas" class="bg-amber-950 rounded-2xl mx-auto shadow-2xl border-4 border-amber-800" width="300" height="300"></canvas>
+                    <div class="mt-4 font-black text-2xl" id="dig-score">0</div>
+                </div>`;
+            const canvas = document.getElementById('dig-canvas'), ctx = canvas.getContext('2d');
+            let player = { x: 150, y: 150, dir: 'RIGHT' }, enemies = [], tunnels = [], dScore = 0;
+            for (let i = 0; i < 3; i++) enemies.push({ x: Math.random() * 200 + 50, y: Math.random() * 200 + 50, inflate: 0 });
+
+            const draw = () => {
+                ctx.fillStyle = "#451a03"; ctx.fillRect(0, 0, 300, 300);
+                // Tunnels
+                ctx.fillStyle = "#000";
+                tunnels.forEach(t => ctx.fillRect(t.x - 10, t.y - 10, 20, 20));
+
+                // Player
+                ctx.fillStyle = "#fff"; ctx.fillRect(player.x - 8, player.y - 8, 16, 16);
+
+                // Enemies
+                enemies.forEach((e, i) => {
+                    ctx.fillStyle = "#ef4444";
+                    ctx.beginPath(); ctx.arc(e.x, e.y, 8 + e.inflate * 5, 0, Math.PI * 2); ctx.fill();
+                    if (e.inflate > 0) e.inflate -= 0.05;
+                    else {
+                        let dx = player.x - e.x, dy = player.y - e.y;
+                        let dist = Math.sqrt(dx * dx + dy * dy);
+                        e.x += dx / dist * 1; e.y += dy / dist * 1;
+                    }
+                    if (e.inflate > 3) { enemies.splice(i, 1); dScore += 200; updateScore(10); sounds.playSuccess(); ignite(e.x, e.y); }
+                    if (Math.sqrt((player.x - e.x) ** 2 + (player.y - e.y) ** 2) < 15) { clearInterval(gameTimer); sounds.playError(); NotificationManager.show("Caught! 🚜", "error"); setTimeout(() => launchGame('dig'), 1500); }
+                });
+
+                document.getElementById('dig-score').innerText = dScore;
+                if (enemies.length === 0) { NotificationManager.show("Field Cleared! 🛸", "success"); updateScore(500); igniteSpread(); clearInterval(gameTimer); }
+            };
+
+            const move = (dx, dy) => {
+                player.x += dx; player.y += dy;
+                player.x = Math.max(10, Math.min(290, player.x)); player.y = Math.max(10, Math.min(290, player.y));
+                tunnels.push({ x: player.x, y: player.y });
+                sounds.playPop();
+            };
+
+            const handleKey = (e) => {
+                if (e.key === 'ArrowUp') move(0, -10);
+                if (e.key === 'ArrowDown') move(0, 10);
+                if (e.key === 'ArrowLeft') move(-10, 0);
+                if (e.key === 'ArrowRight') move(10, 0);
+                if (e.code === 'Space') {
+                    let target = enemies.find(en => Math.sqrt((player.x - en.x) ** 2 + (player.y - en.y) ** 2) < 40);
+                    if (target) { target.inflate += 1; sounds.playClick(); }
+                }
+            };
+
+            window.addEventListener('keydown', handleKey);
+            gameTimer = setInterval(draw, 1000 / 60);
+            const oldClose = closeModal;
+            window.closeModal = () => { clearInterval(gameTimer); window.removeEventListener('keydown', handleKey); window.closeModal = oldClose; oldClose(); };
+        }
+
+        async function setupStarGalaxy(parent) {
+            const game = games.find(g => g.id === 'galaga');
+            game.instructions = "Shoot down the invading alien ships while dodging their fire and dive attacks!";
+            await renderStartScreen(parent, game);
+            parent.innerHTML = `
+                <div class="text-center w-full max-w-sm mx-auto p-4">
+                    <h3 class="text-3xl font-black mb-4">Star Galaxy 🛸</h3>
+                    <canvas id="gal-canvas" class="bg-black rounded-2xl mx-auto shadow-2xl border-4 border-slate-800" width="300" height="300"></canvas>
+                    <div class="mt-4 font-black text-2xl" id="gal-score">0</div>
+                </div>`;
+            const canvas = document.getElementById('gal-canvas'), ctx = canvas.getContext('2d');
+            let player = { x: 150, y: 270 }, bullets = [], enemies = [], gScore = 0, frame = 0;
+            for (let i = 0; i < 6; i++) for (let j = 0; j < 3; j++) enemies.push({ x: 50 + i * 40, y: 40 + j * 30, ox: 50 + i * 40, oy: 40 + j * 30, t: Math.random() * 100 });
+
+            const draw = () => {
+                ctx.fillStyle = "#000"; ctx.fillRect(0, 0, 300, 300);
+                // Player
+                ctx.fillStyle = "#3b82f6"; ctx.fillRect(player.x - 10, player.y, 20, 10);
+                ctx.fillRect(player.x - 2, player.y - 5, 4, 5);
+
+                // Enemies
+                enemies.forEach((e, i) => {
+                    e.t += 0.05; e.x = e.ox + Math.sin(e.t) * 20;
+                    ctx.fillStyle = (i % 2) ? "#ef4444" : "#d946ef";
+                    ctx.beginPath(); ctx.moveTo(e.x, e.y); ctx.lineTo(e.x + 10, e.y + 15); ctx.lineTo(e.x - 10, e.y + 15); ctx.fill();
+
+                    if (Math.random() < 0.001) e.diving = true;
+                    if (e.diving) { e.y += 2; if (e.y > 300) { e.y = 0; e.diving = false; } }
+
+                    if (Math.sqrt((player.x - e.x) ** 2 + (player.y + 5 - e.y - 7) ** 2) < 15) {
+                        clearInterval(gameTimer); sounds.playError(); NotificationManager.show("Invasion Over! 🛸", "error");
+                        setTimeout(() => launchGame('galaga'), 1500);
+                    }
+                });
+
+                // Bullets
+                ctx.fillStyle = "#fff";
+                bullets.forEach((b, bi) => {
+                    b.y -= 5; ctx.fillRect(b.x - 1, b.y, 2, 8);
+                    if (b.y < 0) bullets.splice(bi, 1);
+                    enemies.forEach((e, ei) => {
+                        if (Math.sqrt((b.x - e.x) ** 2 + (b.y - e.y) ** 2) < 15) {
+                            enemies.splice(ei, 1); bullets.splice(bi, 1);
+                            gScore += 100; updateScore(5); sounds.playPop(); ignite(e.x, e.y);
+                        }
+                    });
+                });
+
+                document.getElementById('gal-score').innerText = gScore;
+                if (enemies.length === 0) { NotificationManager.show("Galaxy Saved! ⭐", "success"); updateScore(500); igniteSpread(); clearInterval(gameTimer); }
+            };
+
+            canvas.onmousemove = (e) => {
+                const rect = canvas.getBoundingClientRect();
+                player.x = e.clientX - rect.left;
+                player.x = Math.max(10, Math.min(290, player.x));
+            };
+            canvas.onclick = () => { if (bullets.length < 2) { bullets.push({ x: player.x, y: player.y }); sounds.playClick(); } };
+
+            gameTimer = setInterval(draw, 1000 / 60);
+            const oldClose = closeModal;
+            window.closeModal = () => { clearInterval(gameTimer); window.closeModal = oldClose; oldClose(); };
         }
 
         function showJoke() {
